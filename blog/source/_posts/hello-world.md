@@ -23,17 +23,24 @@ tag: Framework
 
 # Thread-safe
 * CopyOnWriteArrayList
-
 * ConcurrentLinkedQueue
 * BlockingQueue
 * ConcurrentHashMap
 * ConcurrentSkipListMap
-
-
-
 
 ## Why not array?
 * fixed length
 
 ## Iterator
 Safe: when an element is modified, throws concurrentModificationException
+
+## ArrayList vs LinkedList
+* base structure
+* time complexity
+* random access: Arrays.binarySearch(arr, val)
+* memory: empty array cells vs pointers
+
+## ArrayList resize
+
+
+... To be continued
