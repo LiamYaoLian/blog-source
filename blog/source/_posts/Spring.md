@@ -22,23 +22,51 @@ Portlet has been removed
  * @RestController returns JSON or XML
  * @Controller + @ResponseBody = @RestController
 
- ## Spring IoC
+# Configure Application Context
+* XML
+* Java config
 
 
- ## Spring AOP
+## Spring IoC
 
- ## Spring AOP vs AspectJ AOP
 
- ## Bean
+## Spring AOP
 
- ### Bean Scope
+## Spring AOP vs AspectJ AOP
 
- ### Bean Lifecycle
+## Bean
 
- ### @Component vs @Bean
+## Configure Bean
+* XML: better for maintenance at a large company
+* Annotation: faster to write, more readable, suitable for light app
+* Java config: avoid XML, avoid making annotations everywhere, check dependencies during compilation to prevent errors, agile
 
- ### Spring Framework Stereotype Annotations
 
- Reference: https://springframework.guru/spring-framework-annotations/
+### Bean Scope
+
+### Bean Lifecycle
+
+### @Component vs @Bean
+
+### Spring Framework Stereotype Annotations
+* @Component: will be created and managed by IoC container
+* @Controller: request and response
+* @service: business logic
+* @Repository: persistency
+
+### Injection Annotations
+* @Autowired: by class
+* @Inject: by class, not support "required"
+* @Named: by name
+* @Resource: by name first, then by class
+
+### Meta Annotations
+* @Primary: inject this object among objects of the same type
+* @PostConstruct: on a method, "init-method"
+* @PreDestroy: on a method, "destroy-method"
+* @Scope
+* @Value: inject value
+
+Reference: https://springframework.guru/spring-framework-annotations/
 
  ... To be continued
