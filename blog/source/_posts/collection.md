@@ -1,6 +1,7 @@
 ---
 title: Collection
-tag: Framework
+tag: Collection
+categories: Java fundamental
 ---
 
 ![Collection Framework](../image/collection/collection_framework.png)
