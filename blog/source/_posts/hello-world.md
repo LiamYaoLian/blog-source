@@ -1,38 +1,39 @@
 ---
-title: Hello World
+title: Collection
+tag: Framework
 ---
-Welcome to [Hexo](https://hexo.io/)! This is your very first post. Check [documentation](https://hexo.io/docs/) for more info. If you get any problems when using Hexo, you can find the answer in [troubleshooting](https://hexo.io/docs/troubleshooting.html) or you can ask me on [GitHub](https://github.com/hexojs/hexo/issues).
 
-## Quick Start
+![Collection Framework](../image/collection/collection_framework.png)
 
-### Create a new post
+## List
+* ArrayList: Object[]
+* Vector: Object[], thread-safe
+* LinkedList: doubly-linked
 
-``` bash
-$ hexo new "My New Post"
-```
+## Set
+* HashSet: based on HashMap
+* LinkedHashSet: extends HashSet, use LinkedHashMap
+* TreeSet: RedBlackTree
 
-More info: [Writing](https://hexo.io/docs/writing.html)
+## Map
+* HashMap: if array length < 64, array + linked list, resizes the array, otherwise converts the linked list to RedBlackTree
+* LinkedHashMap: extends HashMap, adds a doubly-linked list to save the order of keys
+* HashTable: array + linked list; thread-safe
+* TreeMap: RedBlackTree
 
-### Run server
+# Thread-safe
+* CopyOnWriteArrayList
 
-``` bash
-$ hexo server
-```
+* ConcurrentLinkedQueue
+* BlockingQueue
+* ConcurrentHashMap
+* ConcurrentSkipListMap
 
-More info: [Server](https://hexo.io/docs/server.html)
 
-### Generate static files
 
-``` bash
-$ hexo generate
-```
 
-More info: [Generating](https://hexo.io/docs/generating.html)
+## Why not array?
+* fixed length
 
-### Deploy to remote sites
-
-``` bash
-$ hexo deploy
-```
-
-More info: [Deployment](https://hexo.io/docs/one-command-deployment.html)
+## Iterator
+Safe: when an element is modified, throws concurrentModificationException
