@@ -71,4 +71,13 @@ Eventual instead of strong consistency
 * ACID: strong consistency
 * BASE: sacrifice consistency for availability
 
-## Type
+## How to solve the consistency problem
+* avoid distribution
+* distributed transaction
+
+## Distributed Transaction Type
+* Hard transaction: CP. Suitable for low concurrency and short transaction
+* Soft transaction: BASE.
+
+### Hard transaction
+* XA: 2PC, JTA, JTS; 3PC; due to synchronous blocking, low efficiency. 
