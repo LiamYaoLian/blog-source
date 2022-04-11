@@ -122,10 +122,42 @@ Class A and class B use the same methods. To avoid repetition, we put it in `Xxx
   - Entity and Repository
   - BO and Service
   - VO and Controller
-* Rich Demain Model: data and logic are in the same class. Service layer includes service classes and domain classes (similar to BO). 贫血模式重Service轻BO，充血模式轻Service重Domain。适合业务复杂，improve reusability. 
+* Rich Demain Model: data and logic are in the same class. Service layer includes service classes and domain classes (similar to BO). 贫血模式重Service轻BO，充血模式轻Service重Domain。适合业务复杂，improve reusability.
+
+#### Interface vs Abstract Class
+##### Abstract Class
+* is-a
+* 抽象类不允许被实例化，只能被继承
+* 抽象类可以包含属性和方法。方法既可以包含代码实现（比如 Logger 中的 log() 方法），也可以不包含代码实现（比如 Logger 中的 doLog() 方法）。不包含代码实现的方法叫作抽象方法。
+* 子类继承抽象类，必须实现抽象类中的所有抽象方法。
+##### interface
+* has a, contract
+* 接口不能包含属性（也就是成员变量）。
+* 接口只能声明方法，方法不能包含代码实现。
+* 类实现接口的时候，必须实现接口中声明的所有方法。
+
+#### Program to interface
+Program to an interface, not an implementation
 
 
 #### SOLID principles
+* Single Responsibility Principle: A class or module should have a single responsibility. Whether the module is too big depends on the situation. At the beginning, can have a big module. Later when the module becomes too big, we can break it down. Usually should be less than 200 lines and 10 members.
+* Open Closed Principle: software entities (modules, classes, functions, etc.) should be open for extension , but closed for modification. 没有破坏原有代码的正常运行和单元测试。时刻具备扩展意识、抽象意识、封装意识。在识别出代码可变部分和不可变部分之后，我们要将可变部分封装起来，隔离变化，提供抽象化的不可变接口，给上层系统使用。当具体的实现发生变化的时候，我们只需要基于相同的抽象接口，扩展一个新的实现，替换掉老的实现即可，上游系统的代码几乎不需要修改。多态、依赖注入、基于接口而非实现编程。
+
+最合理的做法是，对于一些比较确定的、短期内可能就会扩展，或者需求改动对代码结构影响比较大的情况，或者实现成本不高的扩展点，在编写代码的时候之后，我们就可以事先做些扩展性设计。但对于一些不确定未来是否要支持的需求，或者实现起来比较复杂的扩展点，我们可以等到有需求驱动的时候，再通过重构代码的方式来支持扩展的需求。
+
+在扩展性和可读性之间做权衡
+
+* Liskov Substitution Principle: Functions that use pointers of references to base classes must be able to use objects of derived classes without knowing it
+子类在设计的时候，要遵守父类的行为约定（或者叫协议）。父类定义了函数的行为约定，那子类可以改变函数的内部实现逻辑，但不能改变函数原有的行为约定。这里的行为约定包括：函数声明要实现的功能；对输入、输出、异常的约定；甚至包括注释中所罗列的任何特殊说明。实际上，定义中父类和子类之间的关系，也可以替换成接口和实现类之间的关系。
+* Interface Segregation Principle: Clients should not be forced to depend upon interfaces that they do not use
+
+* Dependency Inversion Principle: High-level modules shouldn’t depend on low-level modules. Both modules should depend on abstractions. In addition, abstractions shouldn’t depend on details. Details depend on abstractions.调用者属于高层，被调用者属于低层。
+
+“控制”指的是对程序执行流程的控制，而“反转”指的是在没有使用框架之前，程序员自己控制整个程序的执行。在使用框架之后，整个程序的执行流程通过框架来控制。流程的控制权从程序员“反转”给了框架。
+
+依赖注入和控制反转恰恰相反，它是一种具体的编码技巧。我们不通过 new 的方式在类内部创建依赖类的对象，而是将依赖的类对象在外部创建好之后，通过构造函数、函数参数等方式传递（或注入）给类来使用。
+
 
 ## Design Pattern
 
