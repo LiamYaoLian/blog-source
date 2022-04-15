@@ -160,6 +160,68 @@ Program to an interface, not an implementation
 
 
 ## Design Pattern
+### Singleton
+* create and provide only one instance by itself
+* implementation
+    - private constructor
+    - private static object
+    - public static method to create and get
+* type
+    - hungry: Instantiate when loading the class; thread-safe
+    ```
+    //饿汉式：创建对象实例的时候直接初始化  空间换时间
+public class SingletonOne {
+	//1、创建类中私有构造
+	private SingletonOne(){
+
+	}
+
+	//2、创建该类型的私有静态实例
+	private static SingletonOne instance=new SingletonOne();
+
+	//3、创建公有静态方法返回静态实例对象
+	public static SingletonOne getInstance(){
+		return instance;
+	}
+}
+    ```
+    - lazy: instantiate when using; not thread-safe
+    ```
+    //懒汉式：类内实例对象创建时并不直接初始化，直到第一次调用get方法时，才完成初始化操作
+//时间换空间
+public class SingletonTwo {
+	//1、创建私有构造方法
+	private SingletonTwo(){
+
+	}
+
+	//2、创建静态的该类实例对象
+	private static SingletonTwo instance=null;
+
+	//3、创建开放的静态方法提供实例对象
+	public static SingletonTwo getInstance(){
+		if(instance==null)
+			instance=new SingletonTwo();
+
+		return instance;
+	}
+}
+    ```
+        - 同步锁
+        - 双重校验锁
+        - 静态内部类
+        - 枚举
+* pro
+  - save memory
+  - avoid frequent creating
+* con
+  - hard to extend
+  - if not used for a long time, lost due to GC
+* when to use
+  - save memory
+  - universal handling
+  - multiple instances will cause problems, e.g. order number generator
+
 
 ## Coding Standards
 * reference: 《重构》《代码大全》《代码简洁之道》
