@@ -17,7 +17,69 @@ tags: DB
   - storage engine: store, update log
     - engines: InnoDb, MyISAM, Memory, etc
 
-## Syntax
+
+
+## data types
+## String
+* char: 255
+* varchar: 255, variable length
+* text: 65535
+## Date and Time
+* Date
+* Datetime
+* Timestamp: converted from the current time zone to UTC for storage, and converted back from UTC to the current time zone for retrieval
+
+
+
+
+
+
+## Queries
+![undo log and read-view](../image/mysql/4.png)
+
+### Database
+```
+drop database (if exists) database_name;
+create database database_name;
+show databases;
+```
+
+### Table
+```
+CREATE TABLE database.table_na
+me (
+column1 datatype,
+column2 datatype,
+column3 datatype,
+....);
+drop table (if exists) database.table_name;
+CREATE TABLE database.new_table_name
+AS
+(SELECT column1, column2,...
+FROM existing_table_name
+WHERE ....);
+
+Show tables;
+describe table_name;
+
+
+
+```
+
+### Operator
+* =
+* <>, !=
+* is null, is not null
+* between and
+* in
+* EXISTS
+* like
+  - %: zero or more
+  - _: single
+
+#### Priority
+* () > NOT >And > Or
+
 ### Insert
 ```
 
@@ -104,7 +166,8 @@ DELETE FROM 表名
 WHERE 条件
 
 // 删除全部数据
-DELETE FROM demo.goodsmaster;
+DELETE FROM demo.goodsmaster; // undo log
+Truncate table table_name; // no in undo log
 ```
 
 ### Update
@@ -163,6 +226,56 @@ into_option: {
 }
 
 ```
+
+* Windows
+  - window functions also operate on a subset of rows but they do not reduce the number of rows returned by the query
+···
+window_function_name(expression) OVER (
+   [PARTITION BY <expression>[{,<expression>...}]]
+   [ORDER BY <expression> [ASC|DESC], [{,<expression>...}]] // how the rows are ordered within a partition
+   [frame_unit {<frame_start>|<frame_between>}]
+)
+
+// running total
+SUM(total_price) OVER(ORDER BY Sales_Date rows between UNBOUNDED PRECEDING and current row) AS Running_Total
+···
+  - A frame is defined with respect to the current row, which allows a frame to move within a partition depending on the position of the current row within its partition.
+  - The frame unit specifies the type of relationship between the current row and frame rows. It can be ROWS or RANGE. The offsets of the current row and frame rows are the row numbers if the frame unit is ROWS and row values the frame unit is RANGE.
+
+
+  - The frame_start defines the frame boundary and contains one of the following:
+    - UNBOUNDED PRECEDING: frame starts at the first row of the partition.
+    - N PRECEDING: a physical N of rows before the first current row. N can be a literal number or an expression that evaluates to a number.
+    - CURRENT ROW: the row of the current calculation
+
+  - The frame_between defines the frame boundary and is as follows:
+    ```
+    BETWEEN frame_boundary_1 AND frame_boundary_2   
+    ```
+    The frame_boundary_1 and frame_boundary_2 can each contain one of the following:
+      - frame_start: as mentioned previously.
+      - UNBOUNDED FOLLOWING: the frame ends at the final row in the partition.
+      - N FOLLOWING: a physical N of rows after the current row.
+  - If you don’t specify the frame_definition in the OVER clause, then MySQL uses the following frame by default:
+    ```
+    RANGE BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW
+    ```
+  ![windows function](../image/mysql/5.png)
+  - Aggregate: Count, Sum, Avg, Min, Max
+  - Offset:
+    - first_value(column_name)
+    - last_value(column_name)
+    - lead(<expression>[,offset[, default_value]]): running diff, e.g. y-o-y; If offset is zero, then the LAG() function evaluates the expression for the current row. If you don’t specify the offset, then the LAG() function uses one by default.
+    - lag(<expression>[,offset[, default_value]]): running diff, e.g. y-o-y
+
+  - Rank
+    - row_number: Assigns a sequential integer to every row within its partition; application: Removing duplicate rows
+    - rank
+    - dense_rank
+
+* distinct
+  - If you have null value in the column, select distinct will only show one null value
+  - Select multiple columns: MySQL uses the combination of values in these columns to determine the uniqueness of the row in the result set
 * Use of an unqualified * with other items in the select list may produce a parse error. To avoid this problem, use a qualified tbl_name.* reference:
 ```
 SELECT AVG(score), t1.* FROM t1 ...
@@ -175,7 +288,7 @@ SELECT AVG(score), t1.* FROM t1 ...
  - it is good practice to be in the habit of using AS explicitly when specifying column aliases.
  - can be used in GROUP BY, ORDER BY, or HAVING clauses
  - If the column alias contains spaces, you need to place it inside quotes
- - It is not permissible to refer to a column alias in a WHERE clause, because the column value might not yet be determined when the WHERE clause is executed.
+ - The execute order after select can use the alias name, otherwise no. It is not permissible to refer to a column alias in a WHERE clause, because the column value might not yet be determined when the WHERE clause is executed.
 ```
 SELECT CONCAT('Jane',' ','Doe') AS 'Full name';
 ```
@@ -190,6 +303,21 @@ tbl_name [[AS] alias] [index_hint]
 
 * GROUP BY
   - permits a WITH ROLLUP modifier. See Section 12.20.2, “GROUP BY Modifiers”.
+    ```
+    SELECT
+        productLine,
+        orderYear,
+        SUM(orderValue) totalOrderValue
+    FROM
+        sales
+    GROUP BY
+        productline,
+        orderYear
+    WITH ROLLUP;
+    ```
+    ![with rollup](../image/mysql/6.png)
+    https://www.mysqltutorial.org/mysql-rollup/
+  - The number of dimension column you selected can not larger than that of followed by clause group by
 
 
 
@@ -200,7 +328,7 @@ tbl_name [[AS] alias] [index_hint]
 
 * limit:
  - start index is 0
- - `limit 1, 2`: 1 means starting from index 1 (included); 2 means 2 records
+ - `limit 1, 2`: 1 means starting from 1 (included, first row is 0); 2 means 2 records
  - With one argument, the value specifies the number of rows to return from the beginning of the result set
  - For prepared statements, you can use placeholders.
  ```
@@ -212,11 +340,20 @@ tbl_name [[AS] alias] [index_hint]
 
 
 * HAVING
-   - The query result includes only groups satisfying the HAVING conditions. (If no GROUP BY is present, all rows implicitly form a single aggregate group.).
+   - The query result includes only groups satisfying the HAVING conditions. (If no GROUP BY is present, all rows implicitly form a single aggregate group.)
    - The WHERE clause specifies conditions on columns in the select list, but cannot refer to aggregate functions.
-   - LIMIT is applied after HAVING
    - SQL standard: HAVING must reference only columns in the GROUP BY clause or columns used in aggregate functions. Extension: permits HAVING to refer to columns in the SELECT list and columns in outer subqueries. If a HAVING column name is used both in GROUP BY and as an aliased column in the select column list, preference is given to the column in the GROUP BY column
-   -
+
+ * aggregation function
+  - AVG: ignore null
+  - COUNT
+    - COUNT(*) to count the number of rows in a table
+    - COUNT(column) ignores NULL values
+  - MAX: ignore null
+  - MIN: ignore null
+  - SUM: ignore null
+  - for each group
+  - can put `Distinct` inside (), such as `count(DISTINCT prod_price)`
 
  * For update: ...
  * DISTINCT
@@ -226,6 +363,116 @@ tbl_name [[AS] alias] [index_hint]
  * SQL_BUFFER_RESULT forces the result to be put into a temporary table. This helps MySQL free the table locks early and helps in cases where it takes a long time to send the result set to the client. This modifier can be used only for top-level SELECT statements, not for subqueries or following UNION.
  * Named Windows: https://dev.mysql.com/doc/refman/8.0/en/window-functions-named-windows.html
  * Partition: https://dev.mysql.com/doc/refman/8.0/en/partitioning-selection.html
+
+### Join
+* inner join
+* left join, right join
+  - If there is no match, the columns of the row from the right/left table will contain NULL
+* Full (outer) Join
+```
+SELECT * FROM t1
+LEFT JOIN t2 ON t1.id = t2.id
+UNION ALL
+SELECT * FROM t1
+RIGHT JOIN t2 ON t1.id = t2.id
+WHERE t1.id IS NULL
+```
+* cross join
+* self join
+
+### Case when
+···
+CASE WHEN [compare_value] THEN result
+[WHEN [compare_value] THEN result ...]
+[ELSE result] END (AS new_column)
+···
+* CASE WHEN case be used in any statement
+
+### union
+* union removes duplicates
+* union all
+* only one order by statement can be used, which is after the final select statement
+
+### function
+
+### common table expression or CTE
+```
+WITH salesrep AS (
+    SELECT
+        employeeNumber,
+        CONCAT(firstName, ' ', lastName) AS salesrepName
+    FROM
+        employees
+    WHERE
+        jobTitle = 'Sales Rep'
+),
+customer_salesrep AS (
+    SELECT
+        customerName, salesrepName
+    FROM
+        customers
+            INNER JOIN
+        salesrep ON employeeNumber = salesrepEmployeeNumber
+)
+SELECT
+    *
+FROM
+    customer_salesrep
+ORDER BY customerName;
+
+
+
+WITH RECURSIVE cte_name AS (
+    initial_query  -- anchor member
+    UNION ALL
+    recursive_query -- recursive member that references to the CTE name
+)
+SELECT * FROM cte_name;
+```
+to do: https://www.mysqltutorial.org/mysql-recursive-cte/
+
+
+### Execution Order
+From > join > Where > group by > having > select > distinct > order by > limit
+
+### Prepared statement
+```
+SELECT *
+FROM products
+WHERE productCode = ?;
+```
+* When MySQL executes this query with different productcode values, it does not have to fully parse the query. As a result, this helps MySQL execute the query faster, especially when MySQL executes the same query multiple times.
+* Since the prepared statement uses placeholders (?), this helps avoid many variants of SQL injection hence make your application more secure.
+
+```
+PREPARE stmt1 FROM
+	'SELECT
+   	    productCode,
+            productName
+	FROM products
+        WHERE productCode = ?';
+
+
+SET @pc = 'S10_1678';
+
+EXECUTE stmt1 USING @pc;
+
+DEALLOCATE PREPARE stmt1;
+```
+
+## Constraint
+### PK vs FK
+* PK
+  - unique
+  - not null
+  - one but can be multiple columns
+* FK
+  - primary key in another table
+  - can be null
+  - can have more than one FK
+
+## View
+* read-only, no storage
 
 
 
