@@ -740,6 +740,11 @@ public class ImoocLoginServlet extends HttpServlet {
   - xml
   - functions
 
+### Listener
+* ServletContext - 对全局ServletContext及其属性进行监听
+* HttpSession - 对用户会话及其属性操作进行监听
+* ServletRequest - 对请求及属性操作进行监听
+
 
 ## publish
 * export WAR

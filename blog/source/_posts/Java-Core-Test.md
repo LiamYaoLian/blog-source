@@ -9,7 +9,14 @@ tags:
 ![Primitive](../image/java-core-test/1.png)
 ### Non-Primitive
 #### BigDecimal
-to do
+* BigDecimal(val)
+* BigDecimal(String val)
+* add
+* subtract
+* multiply
+* public BigDecimal divide(BigDecimal divisor, int scale, RoundingMode roundingMode)
+* doubleValue(): Converts this BigDecimal to a double.
+* compareTo(BigDecimal val)
 
 ## Operator
 * if the integer / integer (byte, short, char, int, long), result is integer
@@ -861,6 +868,36 @@ public class Queue {
 	}
 }
 ```
+
+#### Pool
+* why
+  - 反复创建线程开销大
+  - 过多的线程会占用太多内存; 如果需要创建5个以上的线程，那么就可以使用线程池来管理
+* constructor
+  - corePoolSize: int, 线程池在完成初始化后，默认情况下，线程池中并没有任何线程，线程池会等待有任务到来时，再创建新线程去执行任务
+  - maxPoolSize int 最大线程数，详解见下文
+  - keepAliveTime long 保持存活时间
+  - workQueue BlockingQueue 任务存储队列
+    - 直接交接：SynchronousQueue, 容量为0
+    - 无界队列：LinkedBlockingQueue
+    - 有界的队列：ArrayBlockingQueue
+  - threadFactory ThreadFactory当线程池需要新的线程的时候，会使用threadFactory来生成新的线程
+    - Executors.defaultThreadFactory()
+    - 创建出来的线程都在同一个线程组，拥有同样的NORM_PRIORITY优先级并且都不是守护线程。
+    - 如果自己指定ThreadFactory，那么就可以改变线程名、线程组、优先级、是否是守护线程等。通常使用默认的ThreadFactory就可以了。
+  - Handler RejectedExecutionHandler 由于线程池无法接受你所提交的任务的拒绝策略
+* rule
+  - 如果线程数小于corePoolSize，即使其他工作线程处于空闲状态，也会创建一个新线程来运行新任务。
+  - 如果线程数等于（或大于）corePoolSize但少于maximumPoolSize，则将任务放入队列。
+  - 如果队列已满，并且线程数小于maxPoolSize，则创建一个新线程来运行任务。只有在队列填满时才创建多于corePoolSize的线程，如果使用的是无界队列（例如LinkedBlockingQueue），那么线程数就不会超过corePoolSize。
+  - 如果队列已满，并且线程数大于或等于maxPoolSize，则拒绝该任务。
+  - 如果线程池当前的线程数多于corePoolSize，那么如果多余的线程空闲时间超过keepAliveTime，它们就会被终止
+* how many threads
+  - CPU密集型（加密、计算hash等）：最佳线程数为CPU核心数的1-2倍左右。
+  - 耗时IO型（读写数据库、文件、网络读写等）：最佳线程数一般会大于CPU核心数很多倍
+  - 参考Brain Goetz推荐的计算方法：线程数=CPU核心数*（1+平均等待时间/平均工作时间）
+  - stress test
+
 
 ### Reflex
 * 运行时动态访问类与对象
