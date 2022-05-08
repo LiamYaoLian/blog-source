@@ -3,6 +3,16 @@ title: Design Pattern
 date: 2022-04-07 17:51:29
 tags: "Design Pattern"
 ---
+
+## Ability
+不仅能编写正确的代码，而且编写代码的速度很快，写出来的代码 bug 很少、性能很好、质量很高
+编程语言，数据结构和算法，设计思想、原则和模式
+架构、高可用、高并发、分布式
+想想如何用
+学历、项目、履历、简历
+沟通能力、公司贡献
+如果要想在技术上形成壁垒，我们就要从事一些有技术难度、技术挑战的岗位，比如基础架构、中间件、数据库等偏底层的开发，又或者是人工智能算法等入行门槛比较高的细分领域。
+
 ## Code Quality
 * maintainability: quickly update without bugs
   - well layered
@@ -137,8 +147,126 @@ Class A and class B use the same methods. To avoid repetition, we put it in `Xxx
 * 类实现接口的时候，必须实现接口中声明的所有方法。
 
 #### Program to interface
-Program to an interface, not an implementation
+* Program to an interface, not an implementation
+* because when requirements change, implementation will change
+* 如果在我们的业务场景中，某个功能只有一种实现方式，未来也不可能被其他实现方式替换，那我们就没有必要为其设计接口
 
+
+
+
+
+#### 多用组合少用继承
+* Why: too many layers of inheritance -> hurt maintainability
+* change "is a" to "has a"
+* Con: 继承改写成组合意味着要做更细粒度的类的拆分. 如果类之间的继承结构稳定（不会轻易改变），继承层次比较浅（比如，最多有两层继承关系），继承关系不复杂，我们就可以大胆地使用继承
+
+  ```
+
+  public interface Flyable {
+    void fly()；
+  }
+  public class FlyAbility implements Flyable {
+    @Override
+    public void fly() { //... }
+  }
+  //省略Tweetable/TweetAbility/EggLayable/EggLayAbility
+
+  public class Ostrich implements Tweetable, EggLayable {//鸵鸟
+    private TweetAbility tweetAbility = new TweetAbility(); //组合
+    private EggLayAbility eggLayAbility = new EggLayAbility(); //组合
+    //... 省略其他属性和方法...
+    @Override
+    public void tweet() {
+      tweetAbility.tweet(); // 委托
+    }
+    @Override
+    public void layEgg() {
+      eggLayAbility.layEgg(); // 委托
+    }
+  }
+  ```
+
+#### Example：接口鉴权的面向对象分析
+* 调用方进行接口请求的时候，将 URL、AppID、密码、时间戳拼接在一起，通过加密算法生成 token，并且将 token、AppID、时间戳拼接在 URL 中，一并发送到微服务端。
+* 微服务端在接收到调用方的接口请求之后，从请求中拆解出 token、AppID、时间戳。
+* 微服务端首先检查传递过来的时间戳跟当前时间，是否在 token 失效时间窗口内。如果已经超过失效时间，那就算接口调用鉴权失败，拒绝接口调用请求。
+* 如果 token 验证没有过期失效，微服务端再从自己的存储中，取出 AppID 对应的密码，通过同样的 token 生成算法，生成另外一个 token，与调用方传递过来的 token 进行匹配；如果一致，则鉴权成功，允许接口调用，否则就拒绝接口调用。
+
+##### 划分职责进而识别出有哪些类
+* method 1:把需求描述中的名词罗列出来，作为可能的候选类，然后再进行筛选
+* method 2 (better):根据需求描述，把其中涉及的功能点，一个一个罗列出来，然后再去看哪些功能点职责相近，操作同样的属性，是否应该归为同一个类
+  * Example: 功能点
+    - 把 URL、AppID、密码、时间戳拼接为一个字符串；
+    - 对字符串通过加密算法加密生成 token；
+    - 将 token、AppID、时间戳拼接到 URL 中，形成新的 URL；
+    - 解析 URL，得到 token、AppID、时间戳等信息；
+    - 从存储中取出 AppID 和对应的密码；
+    - 根据时间戳判断 token 是否过期失效；
+    - 验证两个 token 是否匹配；
+
+  * 从上面的功能列表中，我们发现，1、2、6、7 都是跟 token 有关，负责 token 的生成、验证；3、4 都是在处理 URL，负责 URL 的拼接、解析；5 是操作   AppID 和密码，负责从存储中读取 AppID 和密码。所以，我们可以粗略地得到三个核心的类：AuthToken、Url、CredentialStorage。AuthToken 负责实现 1、2、6、7 这四个操作；Url 负责 3、4 两个操作；CredentialStorage 负责 5 这个操作。
+
+##### 定义类及其属性和方法
+![AuthToken](../image/design-pattern/1.webp)
+![ApiRequest](../image/design-pattern/2.webp)
+![CredentialStorage](../image/design-pattern/3.webp)
+
+##### 定义类与类之间的交互关系
+* Generalization: 继承
+* Realization: implement
+* Aggregation: A 类对象包含 B 类对象，B 类对象的生命周期可以不依赖 A 类对象的生命周期，也就是说可以单独销毁 A 类对象而不影响 B 对象
+* Composition: A 类对象包含 B 类对象，B 类对象的生命周期依赖 A 类对象的生命周期，B 类对象不可单独存在，比如鸟与翅膀之间的关系
+* Association: 包含聚合、组合两种关系。 如果 B 类对象是 A 类的成员变量，那 B 类和 A 类就是关联关系
+* Dependency: 包含关联关系。不管是 B 类对象是 A 类对象的成员变量，还是 A 类的方法使用 B 类对象作为参数或者返回值、局部变量，只要 B 类对象和 A 类对象有任何使用关系，我们都称它们有依赖关系。
+* 下文中，只要 B 类对象是 A 类对象的成员变量，那我们就称，A 类跟 B 类是组合关系。
+![ApiAuthenticator](../image/design-pattern/3.webp)
+```java
+
+public interface ApiAuthenticator {
+  void auth(String url);
+  void auth(ApiRequest apiRequest);
+}
+
+public class DefaultApiAuthenticatorImpl implements ApiAuthenticator {
+  private CredentialStorage credentialStorage;
+
+  public DefaultApiAuthenticatorImpl() {
+    this.credentialStorage = new MysqlCredentialStorage();
+  }
+
+  public DefaultApiAuthenticatorImpl(CredentialStorage credentialStorage) {
+    this.credentialStorage = credentialStorage;
+  }
+
+  @Override
+  public void auth(String url) {
+    ApiRequest apiRequest = ApiRequest.buildFromUrl(url);
+    auth(apiRequest);
+  }
+
+  @Override
+  public void auth(ApiRequest apiRequest) {
+    String appId = apiRequest.getAppId();
+    String token = apiRequest.getToken();
+    long timestamp = apiRequest.getTimestamp();
+    String originalUrl = apiRequest.getOriginalUrl();
+
+    AuthToken clientAuthToken = new AuthToken(token, timestamp);
+    if (clientAuthToken.isExpired()) {
+      throw new RuntimeException("Token is expired.");
+    }
+
+    String password = credentialStorage.getPasswordByAppId(appId);
+    AuthToken serverAuthToken = AuthToken.generate(originalUrl, appId, password, timestamp);
+    if (!serverAuthToken.match(clientAuthToken)) {
+      throw new RuntimeException("Token verfication failed.");
+    }
+  }
+}
+```
+
+
+##### 将类组装起来并提供执行入口
 
 #### SOLID principles
 * Single Responsibility Principle: A class or module should have a single responsibility. Whether the module is too big depends on the situation. At the beginning, can have a big module. Later when the module becomes too big, we can break it down. Usually should be less than 200 lines and 10 members.
@@ -148,7 +276,7 @@ Program to an interface, not an implementation
 
 在扩展性和可读性之间做权衡
 
-* Liskov Substitution Principle: Functions that use pointers of references to base classes must be able to use objects of derived classes without knowing it
+* Liskov Substitution Principle: Functions that use references to base classes must be able to use objects of derived classes without knowing it
 子类在设计的时候，要遵守父类的行为约定（或者叫协议）。父类定义了函数的行为约定，那子类可以改变函数的内部实现逻辑，但不能改变函数原有的行为约定。这里的行为约定包括：函数声明要实现的功能；对输入、输出、异常的约定；甚至包括注释中所罗列的任何特殊说明。实际上，定义中父类和子类之间的关系，也可以替换成接口和实现类之间的关系。
 * Interface Segregation Principle: Clients should not be forced to depend upon interfaces that they do not use
 
@@ -158,6 +286,81 @@ Program to an interface, not an implementation
 
 依赖注入和控制反转恰恰相反，它是一种具体的编码技巧。我们不通过 new 的方式在类内部创建依赖类的对象，而是将依赖的类对象在外部创建好之后，通过构造函数、函数参数等方式传递（或注入）给类来使用。
 
+#### KISS and YAGNI
+* Example
+  - 一个合法的 IP 地址由四个数字组成，并且通过“.”来进行分割。每组数字的取值范围是 0~255。第一组数字比较特殊，不允许为 0
+    ```java
+
+// 第一种实现方式: 使用正则表达式
+public boolean isValidIpAddressV1(String ipAddress) {
+  if (StringUtils.isBlank(ipAddress)) return false;
+  String regex = "^(1\\d{2}|2[0-4]\\d|25[0-5]|[1-9]\\d|[1-9])\\."
+          + "(1\\d{2}|2[0-4]\\d|25[0-5]|[1-9]\\d|\\d)\\."
+          + "(1\\d{2}|2[0-4]\\d|25[0-5]|[1-9]\\d|\\d)\\."
+          + "(1\\d{2}|2[0-4]\\d|25[0-5]|[1-9]\\d|\\d)$";
+  return ipAddress.matches(regex);
+}
+
+// 第二种实现方式: 使用现成的工具类
+public boolean isValidIpAddressV2(String ipAddress) {
+  if (StringUtils.isBlank(ipAddress)) return false;
+  String[] ipUnits = StringUtils.split(ipAddress, '.');
+  if (ipUnits.length != 4) {
+    return false;
+  }
+  for (int i = 0; i < 4; ++i) {
+    int ipUnitIntValue;
+    try {
+      ipUnitIntValue = Integer.parseInt(ipUnits[i]);
+    } catch (NumberFormatException e) {
+      return false;
+    }
+    if (ipUnitIntValue < 0 || ipUnitIntValue > 255) {
+      return false;
+    }
+    if (i == 0 && ipUnitIntValue == 0) {
+      return false;
+    }
+  }
+  return true;
+}
+
+// 第三种实现方式: 不使用任何工具类
+public boolean isValidIpAddressV3(String ipAddress) {
+  char[] ipChars = ipAddress.toCharArray();
+  int length = ipChars.length;
+  int ipUnitIntValue = -1;
+  boolean isFirstUnit = true;
+  int unitsCount = 0;
+  for (int i = 0; i < length; ++i) {
+    char c = ipChars[i];
+    if (c == '.') {
+      if (ipUnitIntValue < 0 || ipUnitIntValue > 255) return false;
+      if (isFirstUnit && ipUnitIntValue == 0) return false;
+      if (isFirstUnit) isFirstUnit = false;
+      ipUnitIntValue = -1;
+      unitsCount++;
+      continue;
+    }
+    if (c < '0' || c > '9') {
+      return false;
+    }
+    if (ipUnitIntValue == -1) ipUnitIntValue = 0;
+    ipUnitIntValue = ipUnitIntValue * 10 + (c - '0');
+  }
+  if (ipUnitIntValue < 0 || ipUnitIntValue > 255) return false;
+  if (unitsCount != 3) return false;
+  return true;
+}
+    ```
+  - 尽管第三种实现方式性能更高些，但我还是更倾向于选择第二种实现方法。那是因为第三种实现方式实际上是一种过度优化。除非 isValidIpAddress() 函数是影响系统性能的瓶颈代码，否则，这样优化的投入产出比并不高，增加了代码实现的难度、牺牲了代码的可读性，性能上的提升却并不明显
+
+* 不要使用同事可能不懂的技术来实现代码。比如前面例子中的正则表达式，还有一些编程语言中过于高级的语法等。如果在 code review 的时候，同事对你的代码有很多疑问，那就说明你的代码有可能不够“简单”，需要优化啦。
+* 不要重复造轮子，要善于使用已经有的工具类库。经验证明，自己去实现这些类库，出 bug 的概率会更高，维护的成本也比较高。不要过度优化。
+* 不要过度使用一些奇技淫巧（比如，位运算代替算术运算、复杂的条件语句代替 if-else、使用一些过于底层的函数等）来优化代码，牺牲代码的可读性。
+* 不要去设计当前用不到的功能；不要去编写当前用不到的代码。当然，这并不是说我们就不需要考虑代码的扩展性。我们还是要预留好扩展点，等到需要的时候，再去实现 ZooKeeper 存储配置信息这部分代码。
+* 我们不要在项目中提前引入不需要依赖的开发包
+
 
 ## Design Pattern
 ### Singleton
@@ -165,7 +368,7 @@ Program to an interface, not an implementation
 * implementation
     - private constructor
     - private static object
-    - public static method to create and get
+    - public static method to create and get. Need to consider whether to add lock
 * type
     - hungry: Instantiate when loading the class; thread-safe
     ```
@@ -186,31 +389,81 @@ public class SingletonOne {
 }
     ```
     - lazy: instantiate when using; not thread-safe
-    ```
+    ```java
     //懒汉式：类内实例对象创建时并不直接初始化，直到第一次调用get方法时，才完成初始化操作
-//时间换空间
-public class SingletonTwo {
-	//1、创建私有构造方法
-	private SingletonTwo(){
+    //时间换空间
 
-	}
+    public class IdGenerator {
+      private AtomicLong id = new AtomicLong(0);
+      private static IdGenerator instance;
+      private IdGenerator() {}
 
-	//2、创建静态的该类实例对象
-	private static SingletonTwo instance=null;
-
-	//3、创建开放的静态方法提供实例对象
-	public static SingletonTwo getInstance(){
-		if(instance==null)
-			instance=new SingletonTwo();
-
-		return instance;
-	}
-}
+      // add lock 并发度很低
+      public static synchronized IdGenerator getInstance() {
+        if (instance == null) {
+          instance = new IdGenerator();
+        }
+        return instance;
+      }
+      public long getId() {
+        return id.incrementAndGet();
+      }
+    }
     ```
-        - 同步锁
-        - 双重校验锁
-        - 静态内部类
-        - 枚举
+
+    - 双重校验锁: 既支持延迟加载、又支持高并发的单例实现方式
+      ```java
+public class IdGenerator {
+  private AtomicLong id = new AtomicLong(0);
+  private static IdGenerator instance;
+  private IdGenerator() {}
+  public static IdGenerator getInstance() {
+    if (instance == null) {
+      synchronized(IdGenerator.class) { // 此处为类级别的锁
+        if (instance == null) {
+          instance = new IdGenerator();
+        }
+      }
+    }
+    return instance;
+  }
+  public long getId() {
+    return id.incrementAndGet();
+  }
+}
+      ```
+    - 静态内部类: 类似饿汉式，但又能做到了延迟加载
+      ```java
+
+        public class IdGenerator {
+        private AtomicLong id = new AtomicLong(0);
+        private IdGenerator() {}
+
+        private static class SingletonHolder{
+          private static final IdGenerator instance = new IdGenerator();
+        }
+
+        public static IdGenerator getInstance() {
+          return SingletonHolder.instance;
+        }
+
+        public long getId() {
+          return id.incrementAndGet();
+        }
+        }
+      ```
+    - 枚举
+      ```java
+
+public enum IdGenerator {
+  INSTANCE;
+  private AtomicLong id = new AtomicLong(0);
+
+  public long getId() {
+    return id.incrementAndGet();
+  }
+}
+      ```
 * pro
   - save memory
   - avoid frequent creating
@@ -220,8 +473,343 @@ public class SingletonTwo {
 * when to use
   - save memory
   - universal handling
-  - multiple instances will cause problems, e.g. order number generator
+  - multiple instances will cause problems, e.g. 两个线程互相覆盖数据，唯一递增 ID 号码生成器（两个对象会造成重复ID）
 
+* Example
+  - FileWriter 本身是对象级别线程安全的
+  ```
+
+public class Logger {
+  private FileWriter writer;
+  private static final Logger instance = new Logger();
+
+  private Logger() {
+    File file = new File("/Users/wangzheng/log.txt");
+    writer = new FileWriter(file, true); //true表示追加写入
+  }
+
+  public static Logger getInstance() {
+    return instance;
+  }
+
+  public void log(String message) {
+    writer.write(mesasge);
+  }
+}
+
+// Logger类的应用示例：
+public class UserController {
+  public void login(String username, String password) {
+    // ...省略业务逻辑代码...
+    Logger.getInstance().log(username + " logined!");
+  }
+}
+
+public class OrderController {  
+  public void create(OrderVo order) {
+    // ...省略业务逻辑代码...
+    Logger.getInstance().log("Created a order: " + order.toString());
+  }
+}
+  ```
+
+### Factory
+* 封装变化：创建逻辑有可能变化
+* 代码复用：创建代码抽离到独立的工厂类之后可以复用。
+* 隔离复杂性：封装复杂的创建逻辑，调用者无需了解如何创建对象。
+* 控制复杂度：将创建代码抽离出来，让原本的函数或类职责更单一，代码更简洁。
+
+#### Simple Factory / Static Factory Method Pattern
+```java
+
+public class RuleConfigSource {
+  public RuleConfig load(String ruleConfigFilePath) {
+    String ruleConfigFileExtension = getFileExtension(ruleConfigFilePath);
+    IRuleConfigParser parser = RuleConfigParserFactory.createParser(ruleConfigFileExtension);
+    if (parser == null) {
+      throw new InvalidRuleConfigException(
+              "Rule config file format is not supported: " + ruleConfigFilePath);
+    }
+
+    String configText = "";
+    //从ruleConfigFilePath文件中读取配置文本到configText中
+    RuleConfig ruleConfig = parser.parse(configText);
+    return ruleConfig;
+  }
+
+  private String getFileExtension(String filePath) {
+    //...解析文件名获取扩展名，比如rule.json，返回json
+    return "json";
+  }
+}
+
+public class RuleConfigParserFactory {
+  public static IRuleConfigParser createParser(String configFormat) {
+    IRuleConfigParser parser = null;
+    if ("json".equalsIgnoreCase(configFormat)) {
+      parser = new JsonRuleConfigParser();
+    } else if ("xml".equalsIgnoreCase(configFormat)) {
+      parser = new XmlRuleConfigParser();
+    } else if ("yaml".equalsIgnoreCase(configFormat)) {
+      parser = new YamlRuleConfigParser();
+    } else if ("properties".equalsIgnoreCase(configFormat)) {
+      parser = new PropertiesRuleConfigParser();
+    }
+    return parser;
+  }
+}
+```
+
+```
+
+public class RuleConfigParserFactory {
+  private static final Map<String, RuleConfigParser> cachedParsers = new HashMap<>();
+
+  static {
+    cachedParsers.put("json", new JsonRuleConfigParser());
+    cachedParsers.put("xml", new XmlRuleConfigParser());
+    cachedParsers.put("yaml", new YamlRuleConfigParser());
+    cachedParsers.put("properties", new PropertiesRuleConfigParser());
+  }
+
+  public static IRuleConfigParser createParser(String configFormat) {
+    if (configFormat == null || configFormat.isEmpty()) {
+      return null;//返回null还是IllegalArgumentException全凭你自己说了算
+    }
+    IRuleConfigParser parser = cachedParsers.get(configFormat.toLowerCase());
+    return parser;
+  }
+}
+```
+#### Factory Method
+* 如果我们非得要将 if 分支逻辑去掉，那该怎么办呢？比较经典处理方法就是利用多态. 工厂方法模式比起简单工厂模式更加符合开闭原则. 当对象的创建逻辑比较复杂，不只是简单的 new 一下就可以，而是要组合其他类对象，做各种初始化操作的时候，我们推荐使用工厂方法模式，将复杂的创建逻辑拆分到多个工厂类中，让每个工厂类都不至于过于复杂。而使用简单工厂模式，将所有的创建逻辑都放到一个工厂类中，会导致这个工厂类变得很复杂。
+```java
+
+public interface IRuleConfigParserFactory {
+  IRuleConfigParser createParser();
+}
+
+public class JsonRuleConfigParserFactory implements IRuleConfigParserFactory {
+  @Override
+  public IRuleConfigParser createParser() {
+    return new JsonRuleConfigParser();
+  }
+}
+
+public class XmlRuleConfigParserFactory implements IRuleConfigParserFactory {
+  @Override
+  public IRuleConfigParser createParser() {
+    return new XmlRuleConfigParser();
+  }
+}
+
+public class YamlRuleConfigParserFactory implements IRuleConfigParserFactory {
+  @Override
+  public IRuleConfigParser createParser() {
+    return new YamlRuleConfigParser();
+  }
+}
+
+public class PropertiesRuleConfigParserFactory implements IRuleConfigParserFactory {
+  @Override
+  public IRuleConfigParser createParser() {
+    return new PropertiesRuleConfigParser();
+  }
+}
+```
+```java
+
+public class RuleConfigSource {
+  public RuleConfig load(String ruleConfigFilePath) {
+    String ruleConfigFileExtension = getFileExtension(ruleConfigFilePath);
+
+    IRuleConfigParserFactory parserFactory = RuleConfigParserFactoryMap.getParserFactory(ruleConfigFileExtension);
+    if (parserFactory == null) {
+      throw new InvalidRuleConfigException("Rule config file format is not supported: " + ruleConfigFilePath);
+    }
+    IRuleConfigParser parser = parserFactory.createParser();
+
+    String configText = "";
+    //从ruleConfigFilePath文件中读取配置文本到configText中
+    RuleConfig ruleConfig = parser.parse(configText);
+    return ruleConfig;
+  }
+
+  private String getFileExtension(String filePath) {
+    //...解析文件名获取扩展名，比如rule.json，返回json
+    return "json";
+  }
+}
+
+//因为工厂类只包含方法，不包含成员变量，完全可以复用，
+//不需要每次都创建新的工厂类对象，所以，简单工厂模式的第二种实现思路更加合适。
+public class RuleConfigParserFactoryMap { //工厂的工厂
+  private static final Map<String, IRuleConfigParserFactory> cachedFactories = new HashMap<>();
+
+  static {
+    cachedFactories.put("json", new JsonRuleConfigParserFactory());
+    cachedFactories.put("xml", new XmlRuleConfigParserFactory());
+    cachedFactories.put("yaml", new YamlRuleConfigParserFactory());
+    cachedFactories.put("properties", new PropertiesRuleConfigParserFactory());
+  }
+
+  public static IRuleConfigParserFactory getParserFactory(String type) {
+    if (type == null || type.isEmpty()) {
+      return null;
+    }
+    IRuleConfigParserFactory parserFactory = cachedFactories.get(type.toLowerCase());
+    return parserFactory;
+  }
+}
+```
+
+* 对于规则配置文件解析这个应用场景来说，工厂模式需要额外创建诸多 Factory 类，也会增加代码的复杂性，而且，每个 Factory 类只是做简单的 new 操作，功能非常单薄（只有一行代码），也没必要设计成独立的类，所以，在这个应用场景下，简单工厂模式简单好用，比工厂方法模式更加合适。
+
+#### Abstract Factory
+* not used frequently
+```
+
+针对规则配置的解析器：基于接口IRuleConfigParser
+JsonRuleConfigParser
+XmlRuleConfigParser
+YamlRuleConfigParser
+PropertiesRuleConfigParser
+
+针对系统配置的解析器：基于接口ISystemConfigParser
+JsonSystemConfigParser
+XmlSystemConfigParser
+YamlSystemConfigParser
+PropertiesSystemConfigParser
+```
+针对这种特殊的场景，如果还是继续用工厂方法来实现的话，我们要针对每个 parser 都编写一个工厂类，也就是要编写 8 个工厂类。如果我们未来还需要增加针对业务配置的解析器（比如 IBizConfigParser），那就要再对应地增加 4 个工厂类。而我们知道，过多的类也会让系统难维护。这个问题该怎么解决呢？抽象工厂就是针对这种非常特殊的场景而诞生的。我们可以让一个工厂负责创建多个不同类型的对象（IRuleConfigParser、ISystemConfigParser 等），而不是只创建一种 parser 对象。这样就可以有效地减少工厂类的个数。具体的代码实现如下所示：
+```
+
+public interface IConfigParserFactory {
+  IRuleConfigParser createRuleParser();
+  ISystemConfigParser createSystemParser();
+  //此处可以扩展新的parser类型，比如IBizConfigParser
+}
+
+public class JsonConfigParserFactory implements IConfigParserFactory {
+  @Override
+  public IRuleConfigParser createRuleParser() {
+    return new JsonRuleConfigParser();
+  }
+
+  @Override
+  public ISystemConfigParser createSystemParser() {
+    return new JsonSystemConfigParser();
+  }
+}
+
+public class XmlConfigParserFactory implements IConfigParserFactory {
+  @Override
+  public IRuleConfigParser createRuleParser() {
+    return new XmlRuleConfigParser();
+  }
+
+  @Override
+  public ISystemConfigParser createSystemParser() {
+    return new XmlSystemConfigParser();
+  }
+}
+
+// 省略YamlConfigParserFactory和PropertiesConfigParserFactory代码
+```
+
+### Builder
+* 创建一种类型的复杂对象，通过设置不同的可选参数，“定制化”地创建不同的对象
+* When to use
+  - 我们把类的必填属性放到构造函数中，强制创建对象的时候就设置。如果必填的属性有很多，把这些必填属性都放到构造函数中设置，那构造函数就又会出现参数列表很长的问题。如果我们把必填属性通过 set() 方法设置，那校验这些必填属性是否已经填写的逻辑就无处安放了。
+  - 如果类的属性之间有一定的依赖关系或者约束条件，我们继续使用构造函数配合 set() 方法的设计思路，那这些依赖关系或约束条件的校验逻辑就无处安放了。
+  - 如果我们希望创建不可变对象，也就是说，对象在创建好之后，就不能再修改内部的属性值，要实现这个功能，我们就不能在类中暴露 set() 方法。构造函数配合 set() 方法来设置属性值的方式就不适用了。
+* Example
+  我们可以把校验逻辑放置到 Builder 类中，先创建建造者，并且通过 set() 方法设置建造者的变量值，然后在使用 build() 方法真正创建对象之前，做集中的校验，校验通过之后才会创建对象。除此之外，我们把 ResourcePoolConfig 的构造函数改为 private 私有权限。这样我们就只能通过建造者来创建 ResourcePoolConfig 类对象。并且，ResourcePoolConfig 没有提供任何 set() 方法，这样我们创建出来的对象就是不可变对象了。
+  ```java
+
+  public class ResourcePoolConfig {
+    private String name;
+    private int maxTotal;
+    private int maxIdle;
+    private int minIdle;
+
+    private ResourcePoolConfig(Builder builder) {
+      this.name = builder.name;
+      this.maxTotal = builder.maxTotal;
+      this.maxIdle = builder.maxIdle;
+      this.minIdle = builder.minIdle;
+    }
+    //...省略getter方法...
+
+    //我们将Builder类设计成了ResourcePoolConfig的内部类。
+    //我们也可以将Builder类设计成独立的非内部类ResourcePoolConfigBuilder。
+    public static class Builder {
+      private static final int DEFAULT_MAX_TOTAL = 8;
+      private static final int DEFAULT_MAX_IDLE = 8;
+      private static final int DEFAULT_MIN_IDLE = 0;
+
+      private String name;
+      private int maxTotal = DEFAULT_MAX_TOTAL;
+      private int maxIdle = DEFAULT_MAX_IDLE;
+      private int minIdle = DEFAULT_MIN_IDLE;
+
+      public ResourcePoolConfig build() {
+        // 校验逻辑放到这里来做，包括必填项校验、依赖关系校验、约束条件校验等
+        if (StringUtils.isBlank(name)) {
+          throw new IllegalArgumentException("...");
+        }
+        if (maxIdle > maxTotal) {
+          throw new IllegalArgumentException("...");
+        }
+        if (minIdle > maxTotal || minIdle > maxIdle) {
+          throw new IllegalArgumentException("...");
+        }
+
+        return new ResourcePoolConfig(this);
+      }
+
+      public Builder setName(String name) {
+        if (StringUtils.isBlank(name)) {
+          throw new IllegalArgumentException("...");
+        }
+        this.name = name;
+        return this;
+      }
+
+      public Builder setMaxTotal(int maxTotal) {
+        if (maxTotal <= 0) {
+          throw new IllegalArgumentException("...");
+        }
+        this.maxTotal = maxTotal;
+        return this;
+      }
+
+      public Builder setMaxIdle(int maxIdle) {
+        if (maxIdle < 0) {
+          throw new IllegalArgumentException("...");
+        }
+        this.maxIdle = maxIdle;
+        return this;
+      }
+
+      public Builder setMinIdle(int minIdle) {
+        if (minIdle < 0) {
+          throw new IllegalArgumentException("...");
+        }
+        this.minIdle = minIdle;
+        return this;
+      }
+    }
+  }
+
+  // 这段代码会抛出IllegalArgumentException，因为minIdle>maxIdle
+  ResourcePoolConfig config = new ResourcePoolConfig.Builder()
+          .setName("dbconnectionpool")
+          .setMaxTotal(16)
+          .setMaxIdle(10)
+          .setMinIdle(12)
+          .build();
+  ```
 
 ## Coding Standards
 * reference: 《重构》《代码大全》《代码简洁之道》

@@ -398,8 +398,8 @@ public boolean equals(Object obj) {
 * File(String parent, String child): Creates a new File instance from a parent pathname string and a child pathname string.
 * File(URI uri): Creates a new File instance by converting the given file: URI into an abstract pathname.
 ```
-File file1=new File("c:\\imooc\\io\\score.txt"); // Windows: \\, linux: /
-File file1=new File("c:\\imooc","io\\score.txt");
+File file1=new File("c:\\ll\\io\\score.txt"); // Windows: \\, linux: /
+File file1=new File("c:\\ll","io\\score.txt");
 ```
 
 * isDirectory()
@@ -425,7 +425,7 @@ public class FileInputDemo1 {
 	public static void main(String[] args) {
 
 		try {
-			FileInputStream fis = new FileInputStream("imooc.txt");
+			FileInputStream fis = new FileInputStream("ll.txt");
 
 			int n = 0;
 
@@ -446,7 +446,7 @@ public class FileInputDemo2 {
 
 	public static void main(String[] args) {
 		try {
-			FileInputStream fis = new FileInputStream("imooc.txt");
+			FileInputStream fis = new FileInputStream("ll.txt");
 			byte[] b = new byte[100];
 			fis.read(b, 0, 5);
 			System.out.println(new String(b));
@@ -478,8 +478,8 @@ public class FileOutputDemo {
 		FileOutputStream fos;
 		FileInputStream fis;
 		try {
-			fos = new FileOutputStream("imooc.txt",true);
-			fis = new FileInputStream("imooc.txt");
+			fos = new FileOutputStream("ll.txt",true);
+			fis = new FileInputStream("ll.txt");
 			fos.write(50);
 			fos.write('a');
 			System.out.println(fis.read());
@@ -534,9 +534,9 @@ public class BufferedDemo {
 
 	public static void main(String[] args) {
 		try {
-			FileOutputStream fos = new FileOutputStream("imooc.txt");
+			FileOutputStream fos = new FileOutputStream("ll.txt");
 			BufferedOutputStream bos = new BufferedOutputStream(fos);
-			FileInputStream fis = new FileInputStream("imooc.txt");
+			FileInputStream fis = new FileInputStream("ll.txt");
 			BufferedInputStream bis = new BufferedInputStream(fis);
 			long startTime = System.currentTimeMillis();
 			bos.write(50);
@@ -580,11 +580,11 @@ public class ReaderDemo {
 
 	public static void main(String[] args) {
 		try {
-			FileInputStream fis = new FileInputStream("imooc.txt");
+			FileInputStream fis = new FileInputStream("ll.txt");
 			InputStreamReader isr = new InputStreamReader(fis, "GBK");
 			BufferedReader br = new BufferedReader(isr);
 
-			FileOutputStream fos = new FileOutputStream("imooc1.txt");
+			FileOutputStream fos = new FileOutputStream("ll1.txt");
 			OutputStreamWriter osw = new OutputStreamWriter(fos, "GBK");
 			BufferedWriter bw = new BufferedWriter(osw);
 
@@ -632,9 +632,9 @@ public class GoodsTest {
 
 		Goods goods1 = new Goods("gd001", "电脑", 3000);
 		try {
-			FileOutputStream fos = new FileOutputStream("imooc.txt");
+			FileOutputStream fos = new FileOutputStream("ll.txt");
 			ObjectOutputStream oos = new ObjectOutputStream(fos);
-			FileInputStream fis = new FileInputStream("imooc.txt");
+			FileInputStream fis = new FileInputStream("ll.txt");
 			ObjectInputStream ois = new ObjectInputStream(fis);
 
 			oos.writeObject(goods1);
@@ -959,7 +959,7 @@ public class Queue {
 #### getDeclared
 * getDeclaredConstructor(s)|Method(s)|Field(s)获取对应对象
 ```
-import com.imooc.reflect.entity.Employee;
+import com.ll.reflect.entity.Employee;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
@@ -972,7 +972,7 @@ import java.lang.reflect.Method;
 public class getDeclaredSample {
     public static void main(String[] args) {
         try {
-            Class employeeClass = Class.forName("com.imooc.reflect.entity.Employee");
+            Class employeeClass = Class.forName("com.ll.reflect.entity.Employee");
             Constructor constructor = employeeClass.getConstructor(new Class[]{
                     Integer.class, String.class, Float.class, String.class
             });
@@ -1232,16 +1232,16 @@ public class StreamMethod {
 
 ### Reg
 
-* A: 精准匹配单个字符
-* x | y: 允许出现的2个字符
-* [xyz]: 字符集合,允许出现集合内任意单个字符 z c
+* A: A
+* x | y: x or y
+* [xyz]: x or y or z
 * [a-z], [A-Z], [0-9]
-* [^xyz], [^0-9]: 集合内字符不允许出现
-* `\d` 匹配任意单个数字
+* [^xyz], [^0-9]: not in (x, y, z)
+* `\d` any number
 * `\D` 匹配\d规则之外的任意单个字符
 * `\w` 匹配任意单个字母数字下划线
 * `\W` 匹配\w之外的任意单个字符
-* `\s` 匹配单个空格
+* `\s`: a space
 * `\n` 匹配单个换行符
 * `.` 匹配任意单个字符(换行符除外)
 * `\.` 特殊字符,只匹配.
@@ -1255,8 +1255,502 @@ public class StreamMethod {
 * `.*A$` 尾匹配
 * `^A.*A$` 全字匹配
 * (ab){3}(cd){3}分组: abababcdcdcd
+* Greedy mode: default, use \d{6,8} on 111222333 -> 11122233
+* Non greedy mode: use \d{6,8}? on 111222333 -> 111222
+#### JavaScript
+```
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Insert title here</title>
+</head>
+<body>
+	<form action="#" method="post" id="frmInfo">
+		<div id="err" style="color:red">
+
+		</div>
+		<div>
+			姓名:<input id="name" name="name"/>
+		</div>
+		<div>
+			身份证:<input id="idno" name="idno"/>
+		</div>
+		<div>
+			<input type="submit" />
+		</div>
+	</form>
+	<script type="text/javascript">
+		document.getElementById("frmInfo").onsubmit = function(){
+			//在JS中定义正则表达式对象只需要在 /正则表达式/
+			var regex1 = /^[\u4e00-\u9fa5]{2,8}$/;
+			var regex2 = /^[1234568]\d{16}[0-9xX]$/
+			var name = document.getElementById("name").value;
+			var idno = document.getElementById("idno").value;
+			if (regex1.test(name) == false) {//利用正则校验数据,true代表匹配,false代表不匹配
+				document.getElementById("err").innerHTML = "无效姓名";
+				return false;
+			} else if(regex2.test(idno) == false) {
+				document.getElementById("err").innerHTML = "无效身份证号";
+				return false; // will not submit
+			} async else {
+				alert("验证通过,准备提交")
+				return true; // will submit
+			}
+		}
+	</script>
+</body>
+</html>
+```
+#### Java
+```
+import java.io.BufferedReader;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.InputStreamReader;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
+public class RegexSample {
+	public static void main(String[] args) {
+		StringBuilder content = new StringBuilder();
+		try {
+			FileInputStream fis = new FileInputStream("D:/workspace/regex/WebContent/sample.html");
+			InputStreamReader isr = new InputStreamReader(fis,"UTF-8");
+			BufferedReader bufferedReader = new BufferedReader(isr);
+			String lineText = "";
+			while((lineText = bufferedReader.readLine()) != null) {
+				content.append(lineText + "\n");
+			}
+			bufferedReader.close();
+			System.out.println(content);
+
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+
+		Pattern p = Pattern.compile("<li>([\\u4e00-\\u9fa5]{2,10})([a-zA-Z]+)</li>");
+		Matcher m = p.matcher(content);
+		while(m.find()) {
+//			System.out.println(m.group(0));
+			String chs = m.group(1);
+			String eng = m.group(2);
+			System.out.println(chs + "-" + eng);
+		}
+	}
+}
+
+```
+
+### JDBC
+#### Steps
+* 加载并注册JDBC驱动
+```Java
+String dbDriver = "com.mysql.cj.jdbc.Driver"; //JDBC驱动类
+String dbURL = "jdbc:mysql://localhost:3306/database_name" ; //连接字符串
+String dbUsername = "root"; //数据库用户名
+String dbPassword = "123456"; //数据库密码
+//1.加载并初始化JDBC驱动
+Class.forName(dbDriver);
+//2.创建数据库连接
+Connection connection = DriverManager.getConnection(dbURL, dbUsername, dbPassword);
+```
+  - useSSL true(生产) false(开发) 是否禁用ssl
+  - useUnicode true 启用unicode编码传输数据
+  - characterEncoding UTF-8
+  - serverTimezone Asia/Shanghai 使用东8时区时间,UTC+8
+  - allowPublicKeyRetrieval true 允许从客户端获取公钥加密传输
+* 创建数据库连接
+  ```Java
+    Connection connection = DriverManager.getConnection(dbURL, dbUsername, dbPassword); //创建数据库连接
+  ```
+* 创建Statement对象
+  ```Java
+    Connection connection = DriverManager.getConnection(dbURL, dbUsername, dbPassword); //创建数据库连接
+    //3. 创建Statement对象
+    Statement stmt = conn.createStatement();
+    //4. 执行SQL语句,得到查询结果集ResultSet
+    ResultSet rs = stmt.executeQuery("SELECT * FROM emp"); //执行SQL语句
+  ```
+  - sql参数必须是SELECT
+* PreparedStatement instead of Statement
+  - prevent SQL injection
+  - 执行效率更高
+  ```Java
+    // 利用PreparedStatement预防SQL注入风险
+    // 当dname值为' or 1=1 or 1='时 , 查询不到任何结果
+    // SQL: select * from employee where dname='\' or 1=1 or 1=\''
+    String sql = "select * from employee where dname = ?";
+    PreparedStatement pstmt = conn.prepareStatement(sql);
+    pstmt.setString(1, dname); //设置SQL参数,参数从1开始
+    ResultSet rs = pstmt.executeQuery();
+    while (rs.next()) {
+    ....
+    }
+  ```
+  - wrong
+    ```SQL
+      select * from employee where ?='abc'
+      select * from employee where salary = ?+100
+      select ? from employee where ename = ?
+    ```
+* 遍历查询结果
+  ```Java
+    //遍历查询结果,
+    while (rs.next()) {
+      Integer empId = rs.getInt(1);//得到每行第1列数据,即emp_id
+      String ename = rs.getString("ename") //得到每行员工姓名列
+      Date hiredate = rs.getDate("ename") //入职时间,注:java.sql.Date
+      System.out.println(empId + "-" + ename + "-" + hiredate)
+    }
+  ```
+* 关闭连接,释放资源
+  ```Java
+  try{
+    //创建Statement , 执行SQL语句 , 处理ResultSet得到结果
+    rs.close();
+    stmt.close();
+    }catch(Exception e){
+    e.printStackTrace(); //y异常处理
+    }finally{
+    if(conn != null) { //5. 释放数据库连接
+    try{ conn.close(); }catch(Exception ex){}
+    }
+  }
+  ```
+* 改造程序预防SQL注入攻击
+* insert
+  ```Java
+    String sql= "insert into employee(eno,ename) values(?,?)";
+    PreparedStatement pstmt = conn.prepareStatement(sql);
+    pstmt.setInt(1,10);
+    pstmt.setString(2,"张三");
+    //executeUpdate方法返回记录数
+    int cnt = pstmt.executeUpdate(); //cnt=1
+    System.out.println("数据新增成功");
+  ```
+* update
+  ```Java
+    String sql= "update employee set salary=salary + 1000 where dname=?";
+    PreparedStatement pstmt = conn.prepareStatement(sql);
+    pstmt.setString(1,"研发部");
+    //executeUpdate方法返回记录数
+    int cnt = pstmt.executeUpdate();
+    System.out.println("研发部" + cnt + "名员工提薪1000元");
+  ```
+* delete
+  ```Java
+    String sql= "delete from employee where eno = ?";
+    PreparedStatement pstmt = conn.prepareStatement(sql);
+    pstmt.setInt(1, 3395);
+    //executeUpdate方法返回记录数
+    int cnt = pstmt.executeUpdate();
+    System.out.println(cnt+"名员工数据已被删除");
+  ```
+* Apache Commons DBUtils
+* JDBC中的事务管理
+  - conn.setAutoCommit(true), default
+  - conn.commit();
+  - conn.rollback();
+* 实现批量增加员工
+* 基于实体类实现分页数据封装
+* JDBC中Date日期对象的处理
+  ```Java
+    package com.ll.jdbc.hrapp.command;
+
+    import com.ll.jdbc.common.DbUtils;
+
+    import java.sql.Connection;
+    import java.sql.PreparedStatement;
+    import java.sql.SQLException;
+    import java.text.ParseException;
+    import java.text.SimpleDateFormat;
+    import java.util.Scanner;
+
+    /**
+     * 新增员工数据
+     */
+    public class InsertCommand implements Command{
+        @Override
+        public void execute() {
+            Scanner in = new Scanner(System.in);
+            System.out.print("请输入员工编号:");
+            int eno = in.nextInt();
+            System.out.print("请输入员工姓名:");
+            String ename = in.next();
+            System.out.print("请输入员工薪资:");
+            float salary = in.nextFloat();
+            System.out.print("请输入隶属部门:");
+            String dname = in.next();
+            System.out.print("请输入入职日期：");
+            String strHiredate = in.next();
+            //JDBC获取日期使用java.sql.Date,其继承自java.util.Date
+            //String到java.sql.Date分为两步
+            //1.String转为java.util.Date
+            java.util.Date udHiredate = null;
+            SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+            try {
+                udHiredate = sdf.parse(strHiredate);
+            } catch (ParseException e) {
+                e.printStackTrace();
+            }
+            //2.java.util.Date转为java.sql.Date
+            long time = udHiredate.getTime();//获取自1970年到现在的毫秒数
+            java.sql.Date sdHiredate = new java.sql.Date(time);
+            Connection conn = null;
+            PreparedStatement pstmt = null;
+            try {
+                conn = DbUtils.getConnection();
+                String sql = "insert into employee(eno,ename,salary,dname,hiredate ) values(?,?,?,?,?)";
+                pstmt = conn.prepareStatement(sql);
+                pstmt.setInt(1, eno);
+                pstmt.setString(2, ename);
+                pstmt.setFloat(3, salary);
+                pstmt.setString(4,dname);
+                pstmt.setDate(5,sdHiredate); //java.sql.Date
+                int cnt = pstmt.executeUpdate();//所有写操作都使用executeUpdate
+                System.out.println("cnt:" + cnt);
+                System.out.println(ename + "员工入职手续已办理");
+            } catch (SQLException e) {
+                e.printStackTrace();
+            } catch (ClassNotFoundException e) {
+                e.printStackTrace();
+            } finally {
+                DbUtils.closeConnection(null,pstmt,conn);
+            }
+        }
+    }
+
+  ```
+* JDBC数据批处理
+  ```
+    package com.ll.jdbc.sample;
+
+    import com.ll.jdbc.common.DbUtils;
+
+    import java.sql.Connection;
+    import java.sql.PreparedStatement;
+    import java.sql.SQLException;
+    import java.util.Date;
+
+    /**
+     * JDBC批处理
+     */
+    public class BatchSample {
+        //标准方式插入若干数据
+        private static void tc1(){
+            Connection conn = null;
+            PreparedStatement pstmt = null;
+            try {
+                long startTime = new Date().getTime();
+                conn = DbUtils.getConnection();
+                //JDBC默认使用自动提交模式
+                conn.setAutoCommit(false);//关闭自动提交
+                String sql = "insert into employee(eno,ename,salary,dname) values(?,?,?,?)";
+                for (int i=100000; i<200000; i++){
+                    pstmt = conn.prepareStatement(sql);
+                    pstmt.setInt(1, i);
+                    pstmt.setString(2, "员工" + i);
+                    pstmt.setFloat(3, 4000f);
+                    pstmt.setString(4, "市场部");
+                    pstmt.executeUpdate();
+                }
+                conn.commit();//提交数据
+                long endTime = new Date().getTime();
+                System.out.println("tc1()执行时长：" + (endTime-startTime));
+            } catch (Exception e) {
+                e.printStackTrace();
+                try {
+                    if(conn != null && !conn.isClosed()) {
+                        conn.rollback();//回滚数据
+                    }
+                }catch (SQLException ex){
+                    ex.printStackTrace();
+                }
+            } finally {
+                DbUtils.closeConnection(null, pstmt, conn);
+            }
+        }
+
+
+        //使用批处理插入若干数据
+        private static void tc2(){
+            Connection conn = null;
+            PreparedStatement pstmt = null;
+            try {
+                long startTime = new Date().getTime();
+                conn = DbUtils.getConnection();
+                //JDBC默认使用自动提交模式
+                conn.setAutoCommit(false);//关闭自动提交
+                String sql = "insert into employee(eno,ename,salary,dname) values(?,?,?,?)";
+                pstmt = conn.prepareStatement(sql);
+                for (int i=200000; i<300000; i++){
+                    pstmt.setInt(1, i);
+                    pstmt.setString(2, "员工" + i);
+                    pstmt.setFloat(3, 4000f);
+                    pstmt.setString(4, "市场部");
+                    pstmt.addBatch();//将参数加入批处理任务
+    //                pstmt.executeUpdate();
+                }
+                pstmt.executeBatch();//执行批处理任务
+                conn.commit();//提交数据
+                long endTime = new Date().getTime();
+                System.out.println("tc2()执行时长：" + (endTime-startTime));
+            } catch (Exception e) {
+                e.printStackTrace();
+                try {
+                    if(conn != null && !conn.isClosed()) {
+                        conn.rollback();//回滚数据
+                    }
+                }catch (SQLException ex){
+                    ex.printStackTrace();
+                }
+            } finally {
+                DbUtils.closeConnection(null, pstmt, conn);
+            }
+        }
+
+
+        public static void main(String[] args) {
+            tc1();
+            tc2();
+        }
+    }
+
+  ```
+* 连接池
+  - 连接池负责创建管理连接,程序只负责取用与归还
+  - maxActive should be > user count; initialSize is better to equal to maxActive
+  - Druid
+    - druid-cofig.properties
+  - C3P0
+    - c3p0-config.xml
+
 
 ### Linux
+Linux发行版选择建议
+u
+桌面系统:Ubuntu
+u
+服务器操作系统:
+CentOS
+（免费）
+、
+Red Hat
+Linux
+（收费）
+u
+特定需求: Debian(稳定性)、
+Fedora(新特性)、
+麒麟Linux(国产)
+
+CentOS 7 :
+主流版本,稳定成熟,大多数服务器的首选版本
+Centos 7.7
+
+VMware Workstation虚拟机
+
+SSH是专为远程登录和其他网络服务提供的安全性协议
+
+Linux命令格式
+命令 [参数选项] [文件或路径]
+cd
+切换目录
+pwd
+查看当前目录
+l
+s、
+l
+l
+显示目录内容
+mkdir
+创建目录
+cp
+复制文件与目录
+mv
+移动或重命名文件
+rm
+删除文件或目录
+find
+查找目录或文件
+
+vim文本编辑器
+vim
+[选项]
+[文件]
+u
+普通模式:默认模式,文本只读,不可编辑
+u
+编辑模式:编辑文本模式,普通模式按i键进入,Esc键退出
+u
+命令模式:执行保存、
+搜索、
+退出等操作
+delete或x
+删除单个字符
+dd
+删除整行
+/str
+全文查找str字符串,n下一个,N前一个
+:
+%
+s/old/new/g
+替换文件内所有old字符串为new
+u
+撤销最近一次操作
+:wq或者:wq!
+退出并保存,只读文件要额外加!
+:
+q!
+强制退出放弃保存
+
+常用文本工具
+echo
+屏幕打印与文本输出
+cat
+合并文件或查看文件内容
+tail
+显示文件内容尾部
+grep
+文本过滤工具
+
+文件输入与输出
+u
+文件输入：
+<
+(重写)
+或者
+<<
+(追加)
+u
+文件输出：> (重写) 或者 >> (追加)
+
+gzip
+tar
+tar
+zcvf
+tomcat.tar.gz
+/usr/local/tomcat
+
+tar
+zxvf
+tomcat.tar.gz
+-C
+/usr/local/tomcat
+
+z
+通过gzip压缩或解压
+c
+创建新的tar.gz文件
+v
+显示执行过程
+f
+指定压缩文件名称
+x
+解压缩tar.gz文件
+-C
+指定解压缩目录
+
 
 ### Maven
 * project manamgement tool
@@ -1270,3 +1764,7 @@ public class StreamMethod {
 * mvn install 安装至本地仓库
 #### package
 to do
+
+
+### IDEA
+* ctrl + shift + T: create test class
