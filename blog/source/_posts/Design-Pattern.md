@@ -5,30 +5,33 @@ tags: "Design Pattern"
 ---
 
 ## Ability
-不仅能编写正确的代码，而且编写代码的速度很快，写出来的代码 bug 很少、性能很好、质量很高
-编程语言，数据结构和算法，设计思想、原则和模式
-架构、高可用、高并发、分布式
-想想如何用
-学历、项目、履历、简历
-沟通能力、公司贡献
-如果要想在技术上形成壁垒，我们就要从事一些有技术难度、技术挑战的岗位，比如基础架构、中间件、数据库等偏底层的开发，又或者是人工智能算法等入行门槛比较高的细分领域。
+What:
+1. 简历：履历、学历、项目
+2. 正确 + 写代码快 + 性能 + 质量
+3. 架构、高可用、高并发、分布式
+4. 沟通能力、公司贡献
+How:
+1. 编程语言，数据结构和算法，设计思想、原则和模式
+2. 想想如何用
+3. 如果要想在技术上形成壁垒，我们就要从事一些有技术难度、技术挑战的岗位，比如基础架构、中间件、数据库等偏底层的开发，又或者是人工智能算法等入行门槛比较高的细分领域。
 
 ## Code Quality
 * maintainability: quickly update without bugs
   - well layered
-  - modularity
-  - high cohesion loose coupling
+  - modularity, high cohesion loose coupling
   - well-documented
   - interface-oriented programming
+  - OOP: encapsulation, abstraction
 * readability
-* extensibility
+* extensibility: open close principle
 * simplicity
 * reusability
-  - inheritance, polymorphism
+  - inheritance and polymorphism
   - SRP
   - high cohesion loose coupling
   - modularity
 * testability
+// todo
 
 ## Paradigm
 * Process-oriented programming: a process is a unit, featuring separation of data structures and methods.
@@ -41,7 +44,6 @@ tags: "Design Pattern"
 #### Four features
 
 * encapsulation: control how to access (get and set) and hide details
- - to increase maintainability
 
 * abstraction: hide details of implementation and only expose what to do
    - may use `interface`, `abstract`, or function
@@ -50,7 +52,6 @@ tags: "Design Pattern"
 
 * inheritance: is-a, e.g. dog is an animal
   - Java: a class can only extend a superclass rater than multiple superclasses
-  - to increase reusability
   - if there are too many inheritance layers, maintainability and readability suffer
 
 * polymorphism: a subclass can replace a superclass
@@ -367,11 +368,11 @@ public boolean isValidIpAddressV3(String ipAddress) {
 * create and provide only one instance by itself
 * implementation
     - private constructor
-    - private static object
+    - private static reference to object
     - public static method to create and get. Need to consider whether to add lock
 * type
     - hungry: Instantiate when loading the class; thread-safe
-    ```
+    ```java
     //饿汉式：创建对象实例的时候直接初始化  空间换时间
 public class SingletonOne {
 	//1、创建类中私有构造
@@ -380,7 +381,7 @@ public class SingletonOne {
 	}
 
 	//2、创建该类型的私有静态实例
-	private static SingletonOne instance=new SingletonOne();
+	private static SingletonOne instance = new SingletonOne();
 
 	//3、创建公有静态方法返回静态实例对象
 	public static SingletonOne getInstance(){
@@ -388,7 +389,7 @@ public class SingletonOne {
 	}
 }
     ```
-    - lazy: instantiate when using; not thread-safe
+    - lazy: instantiate when using; not thread-safe if not add lock
     ```java
     //懒汉式：类内实例对象创建时并不直接初始化，直到第一次调用get方法时，才完成初始化操作
     //时间换空间
@@ -439,7 +440,8 @@ public class IdGenerator {
         private AtomicLong id = new AtomicLong(0);
         private IdGenerator() {}
 
-        private static class SingletonHolder{
+        // static class: holder  
+        private static class SingletonHolder {
           private static final IdGenerator instance = new IdGenerator();
         }
 
@@ -455,14 +457,14 @@ public class IdGenerator {
     - 枚举
       ```java
 
-public enum IdGenerator {
-  INSTANCE;
-  private AtomicLong id = new AtomicLong(0);
+      public enum IdGenerator {
+        INSTANCE;
+        private AtomicLong id = new AtomicLong(0);
 
-  public long getId() {
-    return id.incrementAndGet();
-  }
-}
+        public long getId() {
+          return id.incrementAndGet();
+        }
+      }
       ```
 * pro
   - save memory
@@ -560,7 +562,7 @@ public class RuleConfigParserFactory {
 }
 ```
 
-```
+```java
 
 public class RuleConfigParserFactory {
   private static final Map<String, RuleConfigParser> cachedParsers = new HashMap<>();
@@ -667,7 +669,7 @@ public class RuleConfigParserFactoryMap { //工厂的工厂
 
 #### Abstract Factory
 * not used frequently
-```
+```Java
 
 针对规则配置的解析器：基于接口IRuleConfigParser
 JsonRuleConfigParser
@@ -682,7 +684,7 @@ YamlSystemConfigParser
 PropertiesSystemConfigParser
 ```
 针对这种特殊的场景，如果还是继续用工厂方法来实现的话，我们要针对每个 parser 都编写一个工厂类，也就是要编写 8 个工厂类。如果我们未来还需要增加针对业务配置的解析器（比如 IBizConfigParser），那就要再对应地增加 4 个工厂类。而我们知道，过多的类也会让系统难维护。这个问题该怎么解决呢？抽象工厂就是针对这种非常特殊的场景而诞生的。我们可以让一个工厂负责创建多个不同类型的对象（IRuleConfigParser、ISystemConfigParser 等），而不是只创建一种 parser 对象。这样就可以有效地减少工厂类的个数。具体的代码实现如下所示：
-```
+```java
 
 public interface IConfigParserFactory {
   IRuleConfigParser createRuleParser();

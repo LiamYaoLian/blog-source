@@ -289,15 +289,18 @@ String s6 = new String(b, 1, 2, "utf-8");
 * getClass: Returns the runtime class of this object
 
 #### hashCode()
+
 ```
 public int hashCode() {
+  final int base = 1000000;
+  int result = 17;
   final int prime = 31;
-  int result = 1;
-  result = prime * result + age;
-  result = prime * result + ((name == null) ? 0 : name.hashCode());
+  result = (result * prime % base + (type == null ? 0 : type.hashCode()) % base) % base;
+  result = (result * prime % base + (containerId == null ? 0 : containerId.hashCode()) % base) % base;
+  result = (result * prime % base + (startDate == null ? 0 : startDate.hashCode()) % base) % base;
+  result = (result * prime % base + (endDate == null ? 0 : endDate.hashCode()) % base) % base;
   return result;
 }
-
 ```
 #### equals()
 ```
@@ -319,7 +322,28 @@ public boolean equals(Object obj) {
 
 }
 ```
+```
+public boolean equals(Object other) {
+  if (other == null) {
+    return false;
+  }
 
+  if (other == this) {
+    return true;
+  }
+
+  if (!(other instanceof CostContainer)) {
+    return false;
+  }
+
+
+  CostContainer obj = (CostContainer) other;
+  return obj.getType().equals(type)
+      && obj.getContainerId() == containerId
+      && obj.startDate.equals(startDate)
+      && obj.endDate.equals(endDate);
+}
+```
 ### Polymorphism
 * decide which class' method to use based on the type of instance that calls a method
 * need to have
