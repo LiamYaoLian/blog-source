@@ -14,38 +14,47 @@ tags: DB
     - executor: execute; update binlog in disk
     the server layer has functions, stored procedures, trigger, view, etc
 
-  - storage engine: store, update log
+  - storage engine: read and store, update redo log
     - engines: InnoDb, MyISAM, Memory, etc
 
 
-## comments
+## Comments
 ```SQL
 #
 /**/
 ```
 
-## data types
-## Number
-* TINYINT: 1 byte
-* SMALLINT: 2 bytes
-* MEDIUMINT: 3 bytes
-* INT: 4 bytes
-* BIGINT: 8 bytes
-* FLOAT: 4 bytes
-* DOUBLE: 8 bytes
-* DECIMAL(x,y)
+## Data types
+### Number
+* TINYINT
+* INT: 约21亿
+* BIGINT
+* FLOAT, E38
+* DOUBLE, E308
+* DECIMAL(m,n): m<=65, precise
 
-## String
-* char: 255
-* varchar: variable length; 理论65535，不允许非空字段时最大65533，允许非空字段65532
-* text: variable length; 65535
-* MEDIUMTEXT: variable length; 1千6百万字符
-* LONGTEXT: variable length; 42亿字符
-## Date and Time
+### String
+* char: 255 char
+* varchar: variable length; 理论65535，不允许空字段时最大65531，允许空字段65532
+* text: variable length; cannot be PK
+    - TINYTEXT: 255
+    - TEXT: 65535, recommended
+    - MEDIUMTEXT: 16,777,215
+    - LONGTEXT: 4,294,967,295(4GB)
+* ENUM
+* SET: SET('one', 'two') NOT NULL can have any of these values: 
+    ```sql
+    ''
+    'one'
+    'two'
+    'one,two'
+    ```
+
+### Date and Time
+* Year
 * Date
 * Time
-* Year
-* Datetime
+* Datetime: recommended
 * Timestamp: converted from the current time zone to UTC for storage, and converted back from UTC to the current time zone for retrieval
 
 
@@ -70,7 +79,9 @@ column3 datatype [constraint] [comment],
 INDEX [ 索引名称 ] ( 字段 )
 foreign key (deptno) references t_dept(deptno)
 ....) [comment];
+
 drop table (if exists) database.table_name;
+
 CREATE TABLE database.new_table_name
 AS
 (SELECT column1, column2,...
@@ -81,16 +92,16 @@ Show tables;
 describe table_name;
 
 ALTER TABLE 表名称
-ADD 列1 数据类型 [ 约束 ] [COMMENT 注释] ,
-ADD 列2 数据类型 [ 约束 ] [COMMENT 注释] ;
+ADD 列1 数据类型 [constraint] [COMMENT] ,
+ADD 列2 数据类型 [constraint] [COMMENT] ;
 
 ALTER TABLE 表名称
-MODIFY 列1 数据类型 [ 约束 ] [COMMENT 注释] ,
-MODIFY 列2 数据类型 [ 约束 ] [COMMENT 注释] ;
+MODIFY 列1 数据类型 [constraint] [COMMENT] ,
+MODIFY 列2 数据类型 [constraint] [COMMENT] ;
 
 ALTER TABLE 表名称
-CHANGE 列1 新列名1 数据类型 [ 约束 ] [COMMENT 注释] ,
-CHANGE 列2 新列名2 数据类型 [ 约束 ] [COMMENT 注释] ;
+CHANGE 列1 新列名1 数据类型 [constraint] [COMMENT] ,
+CHANGE 列2 新列名2 数据类型 [constraint] [COMMENT] ;
 
 ALTER TABLE 表名称
 DROP 列1 ,
@@ -103,8 +114,6 @@ ALTER TABLE 表名 RENAME 新表名 ;
 * NOT NULL
 * UNIQUE
 * FOREIGN KEY
-
-
 
 ### Operator
 * =
@@ -127,7 +136,7 @@ ALTER TABLE 表名 RENAME 新表名 ;
   - %: zero or more
   - _: single
 * regexp
-  - `ename regexp "[a-zA-Z]{4}`
+  - `ename regexp "[a-zA-Z]{4}"`
 
 * NOT
 * AND
@@ -141,7 +150,7 @@ ALTER TABLE 表名 RENAME 新表名 ;
 * >>
 
 #### Priority
-* () > NOT >And > Or
+* () > NOT > And > Or
 
 ### Insert
 ```SQL
@@ -162,11 +171,12 @@ VALUES
 (4,'0003','尺子','三角型','把',5);
 
 /*MySQL dialect*/
-INSERT INTO 表名 SET 字段1=值1, 字段2=值2, …… ;
+INSERT INTO 表名 SET 字段1=值1, 字段2=值2, ...... ;
 ```
 
 * can skip inserting some columns if null allowed or have default values
-* ON DUPLICATE: 假设我们要把门店 B 的商品数据，插入到门店 A 的商品表中去，如果有重复的商品编号，就用门店 B 的条码，替换门店 A 的条码，用门店 B 的商品名称，替换门店 A 的商品名称；如果没有重复的编号，就直接把门店 B 的商品数据插入到门店 A 的商品表中。
+* ON DUPLICATE: 假设我们要把门店 B 的商品数据，插入到门店 A 的商品表中去，如果有重复的商品编号，就用门店 B 的条码，替换门店 A 的条码，
+  用门店 B 的商品名称，替换门店 A 的商品名称；如果没有重复的编号，就直接把门店 B 的商品数据插入到门店 A 的商品表中。
 
 ```
 
@@ -192,7 +202,6 @@ mysql> SELECT *
 |          4 | 0004    | 馒头      |               |      |       1.50 |
 +------------+---------+-----------+---------------+------+------------+
 2 rows in set (0.00 sec)
-
 
 
 INSERT INTO demo.goodsmaster
@@ -401,7 +410,7 @@ tbl_name [[AS] alias] [index_hint]
 
 * limit:
  - start index is 0
- - `limit 1, 2`: 1 means starting from 1 (included, first row is 0); 2 means 2 records
+ - `limit 1, 2`: 1 means starting from 1 (included, first row is 0); 2 means returning 2 records
  - With one argument, the value specifies the number of rows to return from the beginning of the result set
  - For prepared statements, you can use placeholders.
  ```
@@ -600,6 +609,8 @@ DEALLOCATE PREPARE stmt1;
   - not null
   - one but can be multiple columns
   - can use AUTO_INCREMENT
+  - Manual assignment: choose the largest ID, add 1 to make the new ID for the new record
+    - why: multiple servers, auto_increment will cause duplicates; don't use business field as PK because the business field may be reused or have duplicates
 * FK
   - primary key in another table
   - can be null
@@ -612,26 +623,77 @@ DEALLOCATE PREPARE stmt1;
 
 
 ## Log
-### Redo Log in InnoDB
-* Write-ahead logging
-  - write to redo log, update memory, then disk
-  - when the redo log is full, move to disk to clean some space
-* Crash-safe: innodb_flush_log_at_trx_commit = 1
-### binlog in the server layer
+### General
+* connection start and end time, all instructions to server
+### Slow
+* my.ini, restart after modifying my.ini
+* 
+### Error
+### binary log in the server layer
 * can be used by all engines
 * Has statement-based logging: Events contain SQL statements that produce data changes (inserts, updates, deletes)
 * append
-* sync_binlog = 1 to make sure binlog is not lost
+* sync_binlog = 1 to make sure binlog is saved to disk
+* show
+    ```sql
+    # show the log that is currently written into
+    SHOW MASTER STATUS; 
+  
+    # all logs
+    SHOW BINARY LOGS; 
+  
+    # all statements
+    SHOW BINLOG EVENTS in log_name; 
+  
+    # create and open a new log
+    FLUSH BINARY LOGS; 
+  
+    # recover
+    mysql -u 用户 -p 密码 数据库名称 < 备份文件
+    # --stop-position=yyy可不写
+    mysqlbinlog –start-positon=xxx --stop-position=yyy 二进制文件名 | mysql -u 用户 -p 
+    
+    
+    # delete all
+    RESET MASTER;
+  
+    # 删除比指定二进制日志文件编号小的所有二进制日志文件
+    PURGE MASTER LOGS TO 'GJTECH-PC-bin.000005';
+  
+    # backup，备份完成后记录位置，防止修复时难以找到start-position
+    mysqldump -u 用户 -p 密码 数据库 > 备份文件
+    FLUSH BINARY LOGS;
+  
+    
+    ```
+### Relay Bin Log
+* on slave server, read bin log from master server and write into
 
-InnoDB prepares redo log. Executor updates binlog. InnoDB commits redo log.
 ### Undo log
+* record what data look like before change, allowing rollback and allowing other transactions to read what data look like before it is changed by this transaction
 * When there are no read-views earlier than this undo log record, it will be deleted.
-![undo log and read-view](../image/mysql/2.webp)
-Source: https://time.geekbang.org/column/article/68963
+  ![undo log and read-view](../image/mysql/2.webp)
+  Source: https://time.geekbang.org/column/article/68963
 * Long transaction will cause too many undo log records to stay
 
 * To avoid long transaction, set autocommit=1
 * To find long transaction (e.g. 60s):
+
+### Redo Log in InnoDB
+* used to recover modification of unfinished transaction
+* Write-ahead logging
+  - write to redo log, update memory, then disk
+  - when the redo log is full, move to disk to clean some space
+* Crash-safe: innodb_flush_log_at_trx_commit = 1
+
+InnoDB prepares redo log. Executor updates binlog. InnoDB commits redo log.
+
+### Example: update
+1. 执行器找引擎取 ID=2 这一行。ID 是主键，引擎直接用树搜索找到这一行。
+2. 如果 ID=2 这一行所在的数据页本来就在内存中，就直接返回给执行器；否则，需要先从磁盘读入内存，然后再返回。
+3. 执行器拿到引擎给的行数据，把这个值加上 1，得到新的一行数据，再调用引擎接口写入这行新数据。
+4. 引擎将新数据更新到内存中，同时将这个更新操作记录到 redo log 里面，此时 redo log 处于 prepare 状态。然后告知执行器执行完成了，随时可以提交事务。
+5. 执行器生成这个操作的 binlog，并把 binlog 写入磁盘。执行器调用引擎的提交事务接口，引擎把刚刚写入的 redo log 改成提交（commit）状态，更新完成。
 
 ```MySql
 
@@ -653,13 +715,46 @@ START TRANSACTION ;
 SQL语句
 [ COMMIT | ROLLBACK ] ;
 ```
-* ACID
+### ACID
+* 事务并不会自动帮你处理 SQL 语句执行中的错误，如果你对事务中的某一步数据操作发生的错误不做处理，继续提交的话，仍然会导致数据不一致。
+    ```sql
 
+    mysql> START TRANSACTION;
+    Query OK, 0 rows affected (0.00 sec)
+    
+    mysql> INSERT INTO demo.mytrans VALUES (1,5); -- 这个插入语句出错了
+    ERROR 1136 (21S01): Column count doesn't match value count at row 1
+    
+    mysql> UPDATE demo.inventory SET invquantity = invquantity - 5 WHERE itemnumber = 1;
+    Query OK, 1 row affected (0.00 sec)    -- 后面的更新语句仍然执行成功了
+    Rows matched: 1 Changed: 1 Warnings: 0
+    
+    mysql> COMMIT;
+    Query OK, 0 rows affected (0.03 sec)   -- 事务提交成功了
+    ```
+   如果发现事务中的某个操作发生错误，要及时使用回滚；
+    ```sql
+    
+    mysql> INSERT INTO demo.mytrans VALUES (1,5);
+    ERROR 1136 (21S01): Column count doesn't match value count at row 1
+    mysql> SELECT ROW_COUNT();
+    +-------------+
+    | ROW_COUNT() |
+    +-------------+
+    | -1 |
+    +-------------+
+    1 row in set (0.00 sec)
+    ```
+* 行锁是在需要的时候才加上的，等到事务结束时才释放。如果你的事务中需要锁多个行，要把最可能造成锁冲突、最可能影响并发度的锁尽量往后放。  
+* Dead lock
+  - 发起死锁检测（默认innodb_deadlock_detect=ON），发现死锁后，InnoDB自动回滚死锁链条中的某一个事务，让其他事务得以继续执行。如果并发能够控制住，比如同一行同时最多只有 10 个线程在更新，那么死锁检测的成本很低 
+  - 你可以考虑通过将一行改成逻辑上的多行来减少锁冲突。还是以影院账户为例，可以考虑放在多条记录上，比如 10 个记录，影院的账户总额等于这 10 个记录的值的总和。
+    这样每次要给影院账户加金额的时候，随机选其中一条记录来加。这样每次冲突概率变成原来的 1/10，可以减少锁等待个数，也就减少了死锁检测的 CPU 消耗。
 ### Isolation Levels
 * `SET SESSION TRANSACTION ISOLATION LEVEL READ UNCOMMITTED`
 * read uncommitted: no read-view.
-* read committed: a read-view is created when a SQL query executes
-* repeatable read: a read-view is created when the transaction executes "select" so the undo log has data, so data seen in this transaction are the same as what they were when this transaction started.
+* read committed: a read-view is created when a SQL query of transaction B executes
+* repeatable read: a read-view is created when the transaction B executes "select" so the undo log has data, so data seen in this transaction are the same as what they were when this transaction started.
 * serializable: read and write will add lock. After a transaction finishes, another transaction can execute.
 ![isolation levels](../image/mysql/1.webp)
 Source: https://time.geekbang.org/column/article/68963
@@ -686,7 +781,17 @@ SHOW INDEX FROM 表名 ;
 DROP INDEX 索引名称 ON 表名 ;
 ```
 * different storage engines may have different index implementation.
-* 不要在大字段上创建索引
+* Clustered index: defines the physical order in which table records are stored in a database; one clustered index per table; by default is PK
+* Secondary index
+* Multiple-column index
+  - leftmost prefix rule
+  - if filter a field by a range, the field after this field in the multiple-column index will not be filtered by using the multiple-column index any longer.
+    For example, index is (branchnumber, cashiernumber, itemnumber), `branchnumber > 10 AND cashiernumber = 1 AND itemnumber = 100`: will use index to filter branchnuber, 
+    but when filtering cashiernumber, it will not use the index (branchnumber, cashiernumber)
+* If there are multiple indexes, MySQL will choose the best
+* Don't create an index on a big field
+
+
 
 
 
@@ -699,3 +804,13 @@ DROP INDEX 索引名称 ON 表名 ;
   - inserting may cause some records to be moved
   - if a data page is full, inserting will create a new data page
 * Usually using auto increment as the primary key leads to better performance and less storage. However, for the k-v situation, may use a business column as the primary key
+
+## Paradigm
+* First: atomic: cannot be separated further
+* Second: every record has a unique identifier; every field depends on the full PK rather than part of PK
+* Third: cannot have field that depends on non-PK
+* Business-first: may not obey paradigm 3
+
+## ER
+* One entity -> a table
+* M-N -> a table
