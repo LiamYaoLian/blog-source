@@ -813,6 +813,223 @@ public class XmlConfigParserFactory implements IConfigParserFactory {
           .build();
   ```
 
+### Observer
+* Define a one-to-many dependency between objects so that when one object changes state, all its dependents are notified and updated automatically.
+```java
+
+public interface Subject {
+  void registerObserver(Observer observer);
+  void removeObserver(Observer observer);
+  void notifyObservers(Message message);
+}
+
+public interface Observer {
+  void update(Message message);
+}
+
+public class ConcreteSubject implements Subject {
+  private List<Observer> observers = new ArrayList<Observer>();
+
+  @Override
+  public void registerObserver(Observer observer) {
+    observers.add(observer);
+  }
+
+  @Override
+  public void removeObserver(Observer observer) {
+    observers.remove(observer);
+  }
+
+  @Override
+  public void notifyObservers(Message message) {
+    for (Observer observer : observers) {
+      observer.update(message);
+    }
+  }
+
+}
+
+public class ConcreteObserverOne implements Observer {
+  @Override
+  public void update(Message message) {
+    //TODO: 获取消息通知，执行自己的逻辑...
+    System.out.println("ConcreteObserverOne is notified.");
+  }
+}
+
+public class ConcreteObserverTwo implements Observer {
+  @Override
+  public void update(Message message) {
+    //TODO: 获取消息通知，执行自己的逻辑...
+    System.out.println("ConcreteObserverTwo is notified.");
+  }
+}
+
+public class Demo {
+  public static void main(String[] args) {
+    ConcreteSubject subject = new ConcreteSubject();
+    subject.registerObserver(new ConcreteObserverOne());
+    subject.registerObserver(new ConcreteObserverTwo());
+    subject.notifyObservers(new Message());
+  }
+}
+```
+
+
+* Below is against SRP
+```java
+
+public class UserController {
+  private UserService userService; // 依赖注入
+  private PromotionService promotionService; // 依赖注入
+
+  public Long register(String telephone, String password) {
+    //省略输入参数的校验代码
+    //省略userService.register()异常的try-catch代码
+    long userId = userService.register(telephone, password);
+    promotionService.issueNewUserExperienceCash(userId);
+    return userId;
+  }
+}
+```
+* Refactored using Observer Pattern
+```java
+
+public interface RegObserver {
+  void handleRegSuccess(long userId);
+}
+
+public class RegPromotionObserver implements RegObserver {
+  private PromotionService promotionService; // 依赖注入
+
+  @Override
+  public void handleRegSuccess(long userId) {
+    promotionService.issueNewUserExperienceCash(userId);
+  }
+}
+
+public class RegNotificationObserver implements RegObserver {
+  private NotificationService notificationService;
+
+  @Override
+  public void handleRegSuccess(long userId) {
+    notificationService.sendInboxMessage(userId, "Welcome...");
+  }
+}
+
+public class UserController {
+  private UserService userService; // 依赖注入
+  private List<RegObserver> regObservers = new ArrayList<>();
+
+  // 一次性设置好，之后也不可能动态的修改
+  public void setRegObservers(List<RegObserver> observers) {
+    regObservers.addAll(observers);
+  }
+
+  public Long register(String telephone, String password) {
+    //省略输入参数的校验代码
+    //省略userService.register()异常的try-catch代码
+    long userId = userService.register(telephone, password);
+
+    for (RegObserver observer : regObservers) {
+      observer.handleRegSuccess(userId);
+    }
+
+    return userId;
+  }
+}
+```
+* 基于消息队列的实现方式，被观察者和观察者解耦更加彻底，两部分的耦合更小。被观察者完全不感知观察者，同理，观察者也完全不感知被观察者。被观察者只管发送消息到消息队列，观察者只管从消息队列中读取消息来执行相应的逻辑。
+
+### Template
+* Define the skeleton of an algorithm in an operation, deferring some steps to subclasses. Template Method lets subclasses redefine certain steps of an algorithm without changing the algorithm’s structure.
+```java
+
+public abstract class AbstractClass {
+  public final void templateMethod() {
+    //...
+    method1();
+    //...
+    method2();
+    //...
+  }
+
+  protected abstract void method1();
+  protected abstract void method2();
+}
+
+public class ConcreteClass1 extends AbstractClass {
+  @Override
+  protected void method1() {
+    //...
+  }
+
+  @Override
+  protected void method2() {
+    //...
+  }
+}
+
+public class ConcreteClass2 extends AbstractClass {
+  @Override
+  protected void method1() {
+    //...
+  }
+
+  @Override
+  protected void method2() {
+    //...
+  }
+}
+
+AbstractClass demo = ConcreteClass1();
+demo.templateMethod();
+
+```
+
+### Chain of Responsibility
+* 在职责链模式中，多个处理器（也就是刚刚定义中说的“接收对象”）依次处理同一个请求。一个请求先经过 A 处理器处理，然后再把请求传递给 B 处理器，B 处理器处理完后再传递给 C 处理器，以此类推，形成一个链条。链条上的每个处理器各自承担各自的处理职责，所以叫作职责链模式。
+```java
+
+
+public abstract class Handler {
+  protected Handler successor = null;
+
+  public void setSuccessor(Handler successor) {
+    this.successor = successor;
+  }
+
+  public final void handle() {
+    boolean handled = doHandle();
+    if (successor != null && !handled) {
+      successor.handle();
+    }
+  }
+
+  protected abstract boolean doHandle();
+}
+
+public class HandlerA extends Handler {
+  @Override
+  protected boolean doHandle() {
+    boolean handled = false;
+    //...
+    return handled;
+  }
+}
+
+public class HandlerB extends Handler {
+  @Override
+  protected boolean doHandle() {
+    boolean handled = false;
+    //...
+    return handled;
+  }
+}
+
+// HandlerChain和Application代码不变
+```
+
 ## Coding Standards
 * reference: 《重构》《代码大全》《代码简洁之道》
 
