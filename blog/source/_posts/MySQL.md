@@ -58,8 +58,6 @@ tags: DB
 * Timestamp: converted from the current time zone to UTC for storage, and converted back from UTC to the current time zone for retrieval
 
 
-
-
 ## Queries
 ![undo log and read-view](../image/mysql/4.png)
 
@@ -76,7 +74,7 @@ CREATE TABLE database.table_name (
 column1 datatype [constraint] [comment],
 column2 datatype [constraint] [comment],
 column3 datatype [constraint] [comment],
-INDEX [ 索引名称 ] ( 字段 )
+INDEX [ index_name ] ( column_name )
 foreign key (deptno) references t_dept(deptno)
 ....) [comment];
 
@@ -91,23 +89,23 @@ WHERE ....);
 Show tables;
 describe table_name;
 
-ALTER TABLE 表名称
-ADD 列1 数据类型 [constraint] [COMMENT] ,
-ADD 列2 数据类型 [constraint] [COMMENT] ;
+ALTER TABLE table_name
+ADD column1 datatype [constraint] [COMMENT] ,
+ADD column2 datatype [constraint] [COMMENT] ;
 
-ALTER TABLE 表名称
-MODIFY 列1 数据类型 [constraint] [COMMENT] ,
-MODIFY 列2 数据类型 [constraint] [COMMENT] ;
+ALTER TABLE table_name
+MODIFY column1 datatype [constraint] [COMMENT] ,
+MODIFY column2 datatype [constraint] [COMMENT] ;
 
-ALTER TABLE 表名称
-CHANGE 列1 新列名1 数据类型 [constraint] [COMMENT] ,
-CHANGE 列2 新列名2 数据类型 [constraint] [COMMENT] ;
+ALTER TABLE table_name
+CHANGE column1 new_column_name1 datatype [constraint] [COMMENT] ,
+CHANGE column2 new_column_name2 datatype [constraint] [COMMENT] ;
 
-ALTER TABLE 表名称
-DROP 列1 ,
-DROP 列2 ;
+ALTER TABLE table_name
+DROP column1 ,
+DROP column2 ;
 
-ALTER TABLE 表名 RENAME 新表名 ;
+ALTER TABLE table_name RENAME new_table_name ;
 ```
 #### constraints
 * PRIMARY KEY
@@ -154,15 +152,12 @@ ALTER TABLE 表名 RENAME 新表名 ;
 
 ### Insert
 ```SQL
-/*
-IGNORE只插入数据库不存在
-*/
-INSERT [ IGNORE ] INTO 表名 [(字段名 [,字段名] ...)] VALUES (值的列表);
+/*IGNORE: only insert records that do not exist*/
+INSERT [ IGNORE ] INTO table_name [(column1 ,column2, ...)] VALUES (value1, value2, ...);
 
-
-INSERT INTO 表名 （字段名）(
-SELECT 字段名或值
-FROM 表名
+INSERT INTO table_name （column_name）(
+SELECT column_name
+FROM table_name
 WHERE 条件);
 
 INSERT INTO demo.goodsmaster
@@ -171,7 +166,7 @@ VALUES
 (4,'0003','尺子','三角型','把',5);
 
 /*MySQL dialect*/
-INSERT INTO 表名 SET 字段1=值1, 字段2=值2, ...... ;
+INSERT INTO table_name SET column1=value1, column2=value2, ...... ;
 ```
 
 * can skip inserting some columns if null allowed or have default values
@@ -223,24 +218,23 @@ mysql> SELECT *
 ```
 
 ### Delete
-```
+```mysql
+/* ignore: if foreign key exists so some records cannot be deleted, will ignore these records  */
+DELETE [ IGNORE ] FROM table_name [ LEFT | RIGHT ] JOIN table_name2 ON conditions 
+WHERE conditions
+[ ORDER BY ... ]
+[ LIMIT ... ] ;
 
-DELETE [ IGNORE ] FROM 表名 [ LEFT | RIGHT ] JOIN 表2 ON 条件
-WHERE 条件
-[ ORDER BY …… ]
-[ LIMIT …… ] ;
-
-// 删除全部数据
+/*delete all*/
 DELETE FROM demo.goodsmaster; // undo log
 Truncate table table_name; // no in undo log
 ```
-* ignore: if foreign key exists so some records cannot be deleted, will ignore these records
 * sequence: from -> where -> order by -> limit -> delete
 
 ### Update
 ```
 
-UPDATE 表名
+UPDATE table_name
 SET 字段名=值
 WHERE 条件
 [ ORDER BY …… ]
@@ -251,23 +245,23 @@ WHERE 条件
 * 因为WHERE子句中的子查询效率非常低，所以我们可以利用表连接的方式来改造UPDATE语句
 ```SQL
 UPDATE 表1 [ LEFT | RIGHT ] JOIN 表2 ON 条件
-SET 字段1 = 值1 , 字段2 = 值2 , …… ;
+SET 字段1 = 值1 , 字段2 = 值2 , ... ;
 
 UPDATE 表1 , 表2
-SET 字段1 = 值1 , 字段2 = 值2 , ……
+SET 字段1 = 值1 , 字段2 = 值2 , ...
 WHERE 连接条件 ;
 ```
 
 ### Read
 ```
 
-SELECT *|字段列表
-FROM 数据源
-WHERE 条件
-GROUP BY 字段
-HAVING 条件
-ORDER BY 字段
-LIMIT 起始点，行数
+SELECT * | column_name
+FROM table_name
+WHERE conditions
+GROUP BY column_name
+HAVING conditions
+ORDER BY column_name
+LIMIT offset，row_count
 ```
 
 ```
@@ -307,8 +301,8 @@ into_option: {
 ```
 
 * Windows
-  - window functions also operate on a subset of rows but they do not reduce the number of rows returned by the query
-···
+  - window functions also operate on a subset of rows, but they do not reduce the number of rows returned by the query
+```
 window_function_name(expression) OVER (
    [PARTITION BY <expression>[{,<expression>...}]]
    [ORDER BY <expression> [ASC|DESC], [{,<expression>...}]] // how the rows are ordered within a partition
@@ -317,7 +311,7 @@ window_function_name(expression) OVER (
 
 // running total
 SUM(total_price) OVER(ORDER BY Sales_Date rows between UNBOUNDED PRECEDING and current row) AS Running_Total
-···
+```  
   - A frame is defined with respect to the current row, which allows a frame to move within a partition depending on the position of the current row within its partition.
   - The frame unit specifies the type of relationship between the current row and frame rows. It can be ROWS or RANGE. The offsets of the current row and frame rows are the row numbers if the frame unit is ROWS and row values the frame unit is RANGE.
 
@@ -367,7 +361,7 @@ SELECT AVG(score), t1.* FROM t1 ...
  - it is good practice to be in the habit of using AS explicitly when specifying column aliases.
  - can be used in GROUP BY, ORDER BY, or HAVING clauses
  - If the column alias contains spaces, you need to place it inside quotes
- - The execute order after select can use the alias name, otherwise no. It is not permissible to refer to a column alias in a WHERE clause, because the column value might not yet be determined when the WHERE clause is executed.
+ - The execution order after select can use the alias name, otherwise no. It is not permissible to refer to a column alias in a WHERE clause, because the column value might not yet be determined when the WHERE clause is executed.
 ```
 SELECT CONCAT('Jane',' ','Doe') AS 'Full name';
 ```
@@ -376,7 +370,7 @@ SELECT CONCAT('Jane',' ','Doe') AS 'Full name';
 ```
 tbl_name [[AS] alias] [index_hint]
 ```
- - devrived table must have an alias
+ - derived table must have an alias
  - If you name more than one table, you are performing a join.
  - The use of index hints provides the optimizer with information about how to choose indexes during query processing. For a description of the syntax for specifying these hints, see Section 8.9.4, “Index Hints”.You can use SET max_seeks_for_key=value as an alternative way to force MySQL to prefer key scans instead of table scans. See Section 5.1.8, “Server System Variables”.
 
@@ -463,11 +457,11 @@ WHERE t1.id IS NULL
 * self join
 
 ### Case when
-···
-CASE WHEN [compare_value] THEN result
-[WHEN [compare_value] THEN result ...]
-[ELSE result] END (AS new_column)
-···
+```sql
+CASE WHEN [compare_value] THEN result       
+[WHEN [compare_value] THEN result ...]      
+[ELSE result] END (AS new_column)           
+```
 * CASE WHEN case be used in any statement
 
 ### union
@@ -512,7 +506,7 @@ CASE WHEN [compare_value] THEN result
 %s 秒
 %r 时间(12)
 %T 时间(24)
-##### DATE_ADD() and
+##### DATE_ADD() and DATEDIFF
 * DATE_ADD( 日期 , INTERVAL 15 DAY )
 * DATEDIFF ( 日期 , 日期 )
 #### String
@@ -529,8 +523,8 @@ SELECT LPAD("SQL Tutorial", 20, "ABC"): ABCABCABSQL Tutorial; Left-pad the strin
 RPAD("Hello",10,"*")
 TRIM(" 你好先生 ")
 #### Condition
-IFNULL( 表达式 , 值 )
-IF( 表达式 , 值1 , 值2 )
+IFNULL(expresssion, value)
+IF(expression, value1, value2)
 
 ### common table expression or CTE
 ```
@@ -566,7 +560,7 @@ WITH RECURSIVE cte_name AS (
 )
 SELECT * FROM cte_name;
 ```
-to do: https://www.mysqltutorial.org/mysql-recursive-cte/
+TODO: https://www.mysqltutorial.org/mysql-recursive-cte/
 
 ### subquery
 * can be in "select", "from", "where"
@@ -627,7 +621,6 @@ DEALLOCATE PREPARE stmt1;
 * connection start and end time, all instructions to server
 ### Slow
 * my.ini, restart after modifying my.ini
-* 
 ### Error
 ### binary log in the server layer
 * can be used by all engines
@@ -678,6 +671,12 @@ DEALLOCATE PREPARE stmt1;
 
 * To avoid long transaction, set autocommit=1
 * To find long transaction (e.g. 60s):
+```MySql
+
+select * from information_schema.innodb_trx where TIME_TO_SEC(timediff(now(),trx_started))>60
+```     
+* Analyze general log to avoid long transaction issues
+* SET_MAX_EXECUTION_TIME  
 
 ### Redo Log in InnoDB
 * used to recover modification of unfinished transaction
@@ -694,14 +693,6 @@ InnoDB prepares redo log. Executor updates binlog. InnoDB commits redo log.
 3. 执行器拿到引擎给的行数据，把这个值加上 1，得到新的一行数据，再调用引擎接口写入这行新数据。
 4. 引擎将新数据更新到内存中，同时将这个更新操作记录到 redo log 里面，此时 redo log 处于 prepare 状态。然后告知执行器执行完成了，随时可以提交事务。
 5. 执行器生成这个操作的 binlog，并把 binlog 写入磁盘。执行器调用引擎的提交事务接口，引擎把刚刚写入的 redo log 改成提交（commit）状态，更新完成。
-
-```MySql
-
-select * from information_schema.innodb_trx where TIME_TO_SEC(timediff(now(),trx_started))>60
-```
-* Analyze general log to avoid long transaction issues
-* SET_MAX_EXECUTION_TIME
-
 
 ### How to restore
 * Find the most recent full backup. Then based on binlog records later than the most recent full backup, restore data.
@@ -775,10 +766,10 @@ SOURCE backup.sql ;
 
 ## index
 ```
-CREATE INDEX 索引名 ON 表名( 字段 ) ；
-ALTER TABLE 表名称 ADD INDEX [ 索引名 ]( 字段 ) ;
-SHOW INDEX FROM 表名 ;
-DROP INDEX 索引名称 ON 表名 ;
+CREATE INDEX 索引名 ON table_name( 字段 ) ；
+ALTER TABLE table_name称 ADD INDEX [ 索引名 ]( 字段 ) ;
+SHOW INDEX FROM table_name ;
+DROP INDEX index_name ON table_name ;
 ```
 * different storage engines may have different index implementation.
 * Clustered index: defines the physical order in which table records are stored in a database; one clustered index per table; by default is PK
@@ -790,9 +781,6 @@ DROP INDEX 索引名称 ON 表名 ;
     but when filtering cashiernumber, it will not use the index (branchnumber, cashiernumber)
 * If there are multiple indexes, MySQL will choose the best
 * Don't create an index on a big field
-
-
-
 
 
 ### InnoDB index model
