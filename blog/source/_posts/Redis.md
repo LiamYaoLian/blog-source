@@ -22,7 +22,7 @@ tags:
 * exit
 * shutdown
 * select 0 // select database No. 0
-* set name lily // 设置key=name,value=lily
+* set name lily // 设置key=name, value=lily
 * get hello // 获得key=hello结果
 * keys he* // 根据Pattern表达式查询符合条件的Key
 * dbsize // 返回key的总数
