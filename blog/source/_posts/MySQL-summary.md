@@ -1,5 +1,5 @@
 ---
-title: MySQL
+title: MySQL Summary
 date: 2022-06-17 20:25:28
 tags: DB
 ---
