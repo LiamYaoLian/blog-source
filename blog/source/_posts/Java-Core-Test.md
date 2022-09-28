@@ -272,14 +272,6 @@ String s6 = new String(b, 1, 2, "utf-8");
 * int length()
 
 
-#### StringBuffer
-* mutable, thread-safe
-
-
-
-
-
-
 ## Object Class
 * superclass of any class
 * equals: addresse1 == addresse2
