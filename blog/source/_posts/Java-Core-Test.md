@@ -24,7 +24,7 @@ tags:
 * logical operator: short circuit; & vs &&
 * priority
   - member. index[] call function()
-  - positive+ negative- ++ -- bitwise complement ~ !
+  - positive+ negative- ++ -- bitwise complement ~ ! // these are unary
   - * / %
   - add+ deduct-  
   - << signed right shift>>  unsigned right shift>>>
@@ -189,9 +189,8 @@ tags:
 
 
 
-
-### Wrapper Class
-#### boxing
+## Wrapper Class
+### boxing
 * manual boxing
   - new Integer(1);
   - Integer.valueOf(1);
@@ -199,7 +198,7 @@ tags:
 * manual unboxing
   - xxValue(): i1.intValue();
 
-#### unboxing
+### unboxing
 * =, pass pamameter, use operator to do operations
 
 * autoboxing: use valueOf()
@@ -212,20 +211,20 @@ Integer integerVal = intVal;
 ```
 int intVal = integerVal;
 ```
-#### 常量池
+### 常量池
 * .valueOf()
 * -128 <= x <= 127
 * except Float and Double
-#### Compare
+### Compare
 * == compares addresses
 * `a.equals(b)` compares type and value. If b is primitive, auto-box it.
-#### Frequently used methods
+### Frequently used methods
 #### String
 * `Integer.toString(1);`
 * `Integer.parseInt("1");` to `int`
 * `Integer.valueOf("1");` to `Integer`
 
-### Method
+## Method
 * overload: same name, different parameter numbers or types
 * override
   - in subclasses
@@ -241,7 +240,7 @@ int intVal = integerVal;
   - overriding method cannot throw a checked exception that is new or more general than that in the overridden method
 * variable arguments: `int... args`
 
-### String
+## String
 * immutable
 * == address; equals() content
 * "s" is constant is in the constant pool. `String s = new String("s")` will check the constant pool first. If exist, use directly.
@@ -259,12 +258,12 @@ String s5 = new String(b, "utf-8");
 String s6 = new String(b, 1, 2, "utf-8");
 ```
 
-#### Frequently Used Methods
+### Frequently Used Methods
 ![Primitive](../image/java-core-test/7.png)
 * `.getBytes()` or `.getBytes("utf-8")`
 * firstName.concat(lastName)
 
-#### StringBuilder
+### StringBuilder
 * mutable, thread-unsafe
 ##### Methods
 * StringBuilder append("s")
@@ -281,14 +280,14 @@ String s6 = new String(b, 1, 2, "utf-8");
 
 
 
-### Object Class
+## Object Class
 * superclass of any class
 * equals: addresse1 == addresse2
 * toString: `getClass().getName() + '@' + Integer.toHexString(hashCode())`; when using sout, used by default
 * hashCode: This is typically implemented by converting the internal address of the object into an integer, but this implementation technique is not required by the Java™ programming language.
 * getClass: Returns the runtime class of this object
 
-#### hashCode()
+### hashCode()
 
 ```
 public int hashCode() {
@@ -302,7 +301,7 @@ public int hashCode() {
   return result;
 }
 ```
-#### equals()
+### equals()
 ```
 public boolean equals(Object obj) {
   if (obj == null) {
@@ -344,7 +343,7 @@ public boolean equals(Object other) {
       && obj.endDate.equals(endDate);
 }
 ```
-### Polymorphism
+## Polymorphism
 * decide which class' method to use based on the type of instance that calls a method
 * need to have
   - inheritance
@@ -353,7 +352,7 @@ public boolean equals(Object other) {
 * downcast: `Cat cat = (Cat)(new Animal());`. can use a method not declared in superclass but declared in subclass. Note the operation priority: `((Chinese)person).kungfu();`.
 * `instanceof`: `cat instanceof Animal; //true`. can only be converted into its original type.
 
-### Inheritance
+## Inheritance
 * is-a
 * only one superclass
 * super
@@ -361,8 +360,8 @@ public boolean equals(Object other) {
   - When construct a subclass, must use the constructor of its superclass. Default is the superclass constructor without parameters. Error if it does not exist.
   - Use `super` to call a superclass constructor. Must be put in the first line of the constructor.
 
-### Interface vs Abstract
-#### Interface
+## Interface vs Abstract
+### Interface
 ···
 [default or public] interface InterfaceName [extends SuperInterfaceName1, SuperInterfaceName2, ...] {
 	[public static final] TypeName CONSTANT = ;
@@ -371,13 +370,13 @@ public boolean equals(Object other) {
 	[public] static TypeName staticMethod() {}; // cannot be inherited or overridden, but the implementation class can declare again
 }
 ···
-* A class can implement multiple interfaces separated by commas. If so, can inherit only abstract methods
+* A class can implement multiple interfaces separated by commas.
 * If the implementation class implements multiple interfaces which have the same method, the implementation class should override the method
 * If the implementation class extends a superclass and implements multiple interfaces and the superclass and interfaces have the same method and the same member variable, and if the implementation class does not override the method, by default the method in the superclass will be used when needed, but cannot tell which member variable to use
 
 
 
-### Exception
+## Exception
 ![Exception and Error](../image/java-core-test/4.png)
 * checked exception: must use "try-catch" or "throws"
 
@@ -415,8 +414,8 @@ public boolean equals(Object other) {
    - NumberFormatException
    - FileNotFoundException
 
-### IO
-#### File
+## IO
+### File
 * File(File parent, String child): Creates a new File instance from a parent abstract pathname and a child pathname string.
 * File(String pathname): Creates a new File instance by converting the given pathname string into an abstract pathname.
 * File(String parent, String child): Creates a new File instance from a parent pathname string and a child pathname string.
@@ -432,8 +431,8 @@ File file1=new File("c:\\ll","io\\score.txt");
 * mkdir()
 * mkdirs()
 * createNewFile()
-#### Byte Stream
-##### FileInputStream
+### Byte Stream
+#### FileInputStream
 * FileInputStream(File file): Creates a FileInputStream by opening a connection to an actual file, the file named by the File object file in the file system.
 * FileInputStream(FileDescriptor fdObj): Creates a FileInputStream by using the file descriptor fdObj, which represents an existing connection to an actual file in the file system.
 * FileInputStream(String name): Creates a FileInputStream by opening a connection to an actual file, the file named by the path name name in the file system.
@@ -484,7 +483,7 @@ public class FileInputDemo2 {
 
 }
 ```
-##### FileOutputStream
+#### FileOutputStream
 * FileOutputStream(File file): Creates a file output stream to write to the file represented by the specified File object.
 * FileOutputStream(File file, boolean append): Creates a file output stream to write to the file represented by the specified File object.
 * FileOutputStream(FileDescriptor fdObj): Creates a file output stream to write to the specified file descriptor, which represents an existing connection to an actual file in the file system.
@@ -545,7 +544,7 @@ public class FileOutputDemo1 {
 	}
 }
 ```
-##### BufferedInputStream and BufferedOutputStream
+#### BufferedInputStream and BufferedOutputStream
 ```
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
@@ -587,9 +586,9 @@ public class BufferedDemo {
 ```
 
 
-#### character stream
+### character stream
 
-##### InputStreamReader, OutputStreamReader, BufferedReader, BufferedWriter
+#### InputStreamReader, OutputStreamReader, BufferedReader, BufferedWriter
 ```
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
@@ -638,7 +637,7 @@ public class ReaderDemo {
 
 ```
 
-#### Serialization
+### Serialization
 * object to bytes
 * class implements Serializable
 * ObjectInputStream and ObjectOutputStream
@@ -688,9 +687,9 @@ public class GoodsTest {
 }
 ```
 
-### 断言
+## 断言
 
-### Generic Type
+## Generic Type
 * generic type as method parameter
   - <? extends Goods>; extends a class or an interface
   - <? super Goods>
@@ -706,16 +705,16 @@ public class GoodsTest {
   ```
 * 泛型的类型参数只能是类类型，不能是基本数据类型
 
-### Collection
+## Collection
 * see the post "Collection"
 
 
-### Multithread
+## Multithread
 * Process: to do
 * Thread
 * 各线程什么时候得到CPU时间，占用多久，是不可预测的
 
-#### Create
+### Create
 * create an instance of Thread or its subclass
   - Thread implements Runnable
   - Thread()
@@ -733,16 +732,14 @@ public class GoodsTest {
   - why to use: can extend only one class; do not want to override other methods in Thread
   ```
   class PrintRunnable implements Runnable {
-	int i = 1;
-	@Override
-	public void run() {
+	   int i = 1;
+     @Override
+  	 public void run() {
 
-		while (i <= 10) {
-			System.out.println(Thread.currentThread().getName() + "正在运行" + (i++));
-		}
-
-	}
-
+  		while (i <= 10) {
+  			System.out.println(Thread.currentThread().getName() + "正在运行" + (i++));
+  	 }
+  	}
   }
 
   public class Test {
@@ -784,11 +781,11 @@ public class GoodsTest {
         }
       }
     ```
-#### Thread methods
+### Thread methods
 * public void run()
 * public void start()
 * public static void sleep(long m) // millisecond, used to do something periodically
-* public void join() // other threads will execute after this thread finishes
+* public void join() // codes after t.join() will execute after thread t finishes
 * public final void join(long millis) // 等待该线程终止的最长时间为millis毫秒。如果millis为0则意味着要一直等下去。
 * getName()
 * public int getPriority()
@@ -796,10 +793,59 @@ public class GoodsTest {
 * wait()
 * notify() // 唤醒一个等待线程
 * nofifyAll() //唤醒所有等待线程
-#### Lifecycle
-![thread lifecycle](../image/java-core-test/8.png)
-* stop() is depreciated
-#### Priority
+### Lifecycle
+![thread lifecycle](../image/java-core-test/thread-life-cycle.webp)
+* runnable:
+  - 对应操作系统的runnable和running
+  - t.start()
+  - .interrupt()
+    - 当线程 A 处于 WAITING、TIMED_WAITING 状态时，A变成runnable状态并抛出InterruptedException
+    - 当线程 A 处于 RUNNABLE 状态时，并且阻塞在 java.nio.channels.InterruptibleChannel 上时，如果其他线程调用线程 A 的 interrupt() 方法，线程 A 会触发 java.nio.channels.ClosedByInterruptException 这个异常；而阻塞在 java.nio.channels.Selector 上时，如果其他线程调用线程 A 的 interrupt() 方法，线程 A 的 java.nio.channels.Selector 会立即返回。
+    - 在触发 InterruptedException 异常的同时，JVM 会同时把线程的中断标志位清除。
+      正确：
+    ```java
+
+    try {
+      Thread.sleep(100);
+    }catch(InterruptedException e){
+      // 重新设置中断标志位
+      th.interrupt();
+    }
+    ```
+      错误：
+    ```java
+
+    Thread th = Thread.currentThread();
+    while(true) {
+      if(th.isInterrupted()) {
+        break;
+      }
+      // 省略业务代码无数
+      try {
+        Thread.sleep(100);
+      }catch (InterruptedException e){
+        e.printStackTrace();
+      }
+    }
+    ```  
+* 线程调用阻塞式 API（例如以阻塞方式读文件） 时：操作系统的线程转换到休眠状态；JVM 的Java 线程的状态不会发生变化
+* blocked: 线程等待synchronized的隐式锁
+* waiting
+  - 获得 synchronized 隐式锁的线程调用Object.wait()
+  - 调用t.join()
+  - 调用 LockSupport.park() 方法
+* TIMED_WAITING
+  - 调用Thread.sleep(long millis)
+  - 获得 synchronized 隐式锁的线程，调用Object.wait(long timeout)；
+  - 调用Thread.join(long millis)；
+  - 调用LockSupport.parkNanos(Object blocker, long deadline)；
+  - 调用LockSupport.parkUntil(long deadline)
+* terminated：
+  - 执行完run(）
+  - run()抛出异常
+
+
+### Priority
 * 1 (MIN_PRIORITY) to 10 (MAX_PRIORITY), default is 5 (NORM_PRIORITY)
 * the thread with higher priority is not necessarily excuted first
 ```
@@ -831,13 +877,13 @@ public class PriorityDemo {
 	}
 }
 ```
-#### synchronized
+### synchronized
 * It is not possible for two invocations of synchronized methods on the same object to interleave. When one thread is executing a synchronized method for an object, all other threads that invoke synchronized methods for the same object block (suspend execution) until the first thread is done with the object.
 * Second, when a synchronized method exits, it automatically establishes a happens-before relationship with any subsequent invocation of a synchronized method for the same object. This guarantees that changes to the state of the object are visible to all threads.
 ```
 public synchronized void saveAccount(){}
 public static synchronized void saveAccount(){}
-synchronized (obj){……}
+synchronized (obj){...}
 
 public void drawAccount() {
   synchronized (this) {
@@ -854,7 +900,7 @@ public void drawAccount() {
   }
 }
 ```
-#### Deadlock
+### Deadlock
 * Deadlock describes a condition in which two or more threads are blocked (hung) forever because they are waiting for each other.
 * notifyAll();
 ```
@@ -893,7 +939,7 @@ public class Queue {
 }
 ```
 
-#### Pool
+### Pool
 * why
   - 反复创建线程开销大
   - 过多的线程会占用太多内存; 如果需要创建5个以上的线程，那么就可以使用线程池来管理
@@ -923,9 +969,9 @@ public class Queue {
   - stress test
 
 
-### Reflex
+## Reflex
 * 运行时动态访问类与对象
-#### Class
+### Class
 * 代表"类和接口"的类
 * 通过Class对象可获取对应类的构造方法/方法/成员变量
 * methods
@@ -940,7 +986,7 @@ public class Queue {
   //通过员工类默认构造方法创建Employee对象
   Employee employee = (Employee)employeeClass.newInstance();
   ```
-#### Constructor
+### Constructor
 * methods
   - classObj.getConstructor(): get a public constructor object
   - constructorObj.newInstance()
@@ -961,7 +1007,7 @@ public class Queue {
                         3000f,
                         "Product"});
   ```
-#### Method
+### Method
 * methods
   - classObj.getMethod(): get a public method object
   - methodObj.invoke()
@@ -970,7 +1016,7 @@ public class Queue {
   //执行方法,为Liam Lian上调薪资300元
   method.invoke(employee, new Object[]{300f});
   ```
-#### Field
+### Field
 * methods
   - classObj.getField(): get a public field object
   - fieldObj.set()
@@ -980,7 +1026,7 @@ public class Queue {
   enameField.set(employee, "Liam Lian");
   String ename = (String)enameField.get(employee);
   ```
-#### getDeclared
+### getDeclared
 * getDeclaredConstructor(s)|Method(s)|Field(s)获取对应对象
 ```
 import com.ll.reflect.entity.Employee;
@@ -1033,7 +1079,7 @@ public class getDeclaredSample {
 
 ```
 
-#### Example
+### Example
 ```
 import java.io.FileInputStream;
 import java.io.UnsupportedEncodingException;
@@ -1061,12 +1107,12 @@ public class Application {
 }
 ```
 
-### Lambda and Functional Programming
+## Lambda and Functional Programming
 * Lambda更简洁的实现匿名内部类与函数声明与调用
 * Collections.sort(names, (a,b) -> {b.compareTo(a)});
 * 函数式编程是基于函数式接口并使用lambda表达的编程方式; 理念是将代码作为可重用数据代入到程序运行中; 函数式接口是有且只有一个抽象方法的接口; @FunctionalInterface//通知编译器这是函数式接口,进行抽象方法检查
 
-#### JDK8 frequently used
+### JDK8 frequently used
 * Consumer<T> 对应有一个输入参数无输出的功能代码
   ```
   import java.util.function.Consumer;
@@ -1134,7 +1180,7 @@ public class Application {
       }
   }
   ```
-#### Stream
+### Stream
 ```
 //获取List集合中最大的偶数
 Optional<Integer> op = Arrays.asList(1,2,3,4,5,6).stream()
@@ -1254,7 +1300,7 @@ public class StreamMethod {
 
 ```
 
-### Reg
+## Reg
 
 * A: A
 * x | y: x or y
@@ -1281,7 +1327,7 @@ public class StreamMethod {
 * (ab){3}(cd){3}分组: abababcdcdcd
 * Greedy mode: default, use \d{6,8} on 111222333 -> 11122233
 * Non greedy mode: use \d{6,8}? on 111222333 -> 111222
-#### JavaScript
+### JavaScript
 ```
 <!DOCTYPE html>
 <html>
@@ -1326,7 +1372,7 @@ public class StreamMethod {
 </body>
 </html>
 ```
-#### Java
+### Java
 ```
 import java.io.BufferedReader;
 import java.io.FileInputStream;
@@ -1366,7 +1412,7 @@ public class RegexSample {
 
 ```
 
-### JDBC
+## JDBC
 #### Steps
 * 加载并注册JDBC驱动
 ```Java
@@ -1651,7 +1697,7 @@ Connection connection = DriverManager.getConnection(dbURL, dbUsername, dbPasswor
     - c3p0-config.xml
 
 
-### Linux
+## Linux
 Linux发行版选择建议
 u
 桌面系统:Ubuntu
@@ -1776,7 +1822,7 @@ x
 指定解压缩目录
 
 
-### Maven
+## Maven
 * project manamgement tool
 * plug-in to export jar: maven-assembly-plugin
 #### Commands
@@ -1790,5 +1836,5 @@ x
 to do
 
 
-### IDEA
+## IDEA
 * ctrl + shift + T: create test class
