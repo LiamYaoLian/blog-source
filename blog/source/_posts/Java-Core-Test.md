@@ -366,7 +366,10 @@ public boolean equals(Object other) {
 * If the implementation class implements multiple interfaces which have the same method, the implementation class should override the method
 * If the implementation class extends a superclass and implements multiple interfaces and the superclass and interfaces have the same method and the same member variable, and if the implementation class does not override the method, by default the method in the superclass will be used when needed, but cannot tell which member variable to use
 
-
+### When to use interface or abstract class
+* multiple inheritance vs single
+* contract
+* access modifier
 
 ## Exception
 ![Exception and Error](../image/java-core-test/4.png)
