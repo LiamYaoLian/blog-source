@@ -39,7 +39,7 @@ tags:
   - abstract changable codes
 * Liskov Substitution Principle: functions that use references to base classes must be able to use objects of derived classes without knowing it
   - respect the contract: what to do, input, output, exception
-* Interface Segregation Principle: clients should not be forced to depend upon interfaces that they do not use  
+* Interface Segregation Principle: clients should not be forced to depend upon interfaces that they do not use, or clients shouldn’t be forced to depend on methods they do not use  
 * Dependency Inversion Principle: High-level modules shouldn’t depend on low-level modules. Both modules should depend on abstractions.
   - Program to interface, if there may be multiple implementation ways
   - 调用者属于高层，被调用者属于低层。

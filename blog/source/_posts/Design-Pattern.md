@@ -279,7 +279,7 @@ public class DefaultApiAuthenticatorImpl implements ApiAuthenticator {
 
 * Liskov Substitution Principle: Functions that use references to base classes must be able to use objects of derived classes without knowing it
 子类在设计的时候，要遵守父类的行为约定（或者叫协议）。父类定义了函数的行为约定，那子类可以改变函数的内部实现逻辑，但不能改变函数原有的行为约定。这里的行为约定包括：函数声明要实现的功能；对输入、输出、异常的约定；甚至包括注释中所罗列的任何特殊说明。实际上，定义中父类和子类之间的关系，也可以替换成接口和实现类之间的关系。
-* Interface Segregation Principle: Clients should not be forced to depend upon interfaces that they do not use
+* Interface Segregation Principle: Clients should not be forced to depend upon interfaces that they do not use, or clients shouldn’t be forced to depend on methods they do not use
 
 * Dependency Inversion Principle: High-level modules shouldn’t depend on low-level modules. Both modules should depend on abstractions. In addition, abstractions shouldn’t depend on details. Details depend on abstractions.调用者属于高层，被调用者属于低层。
 
