@@ -30,6 +30,9 @@ req.user = user
 * Con
 - after logout, cannot invalidate token immediately
 
+* Anti-pattern
+- JWT token should contain user information instead of data authorized
+
 # Session Cookie
 1. server authenticates (correct username and password)
 2. server generates session id (signed with “secret key”)
