@@ -3,7 +3,7 @@ title: SQL Query Tuning
 date: 2022-11-05 11:47:08
 tags:
 ---
-Reference: https://www.oreilly.com/library/view/high-performance-mysql/9780596101718/ch04.html
+
 
 # what happens when you send MySQL a query:
 The client sends the SQL statement to the server.
@@ -111,3 +111,5 @@ limit 10;
   mysql> SELECT actor_id FROM sakila.actor USE INDEX(PRIMARY)
       -> WHERE first_name = 'PENELOPE' LIMIT 1;
   ```   
+  
+Reference: https://www.oreilly.com/library/view/high-performance-mysql/9780596101718/ch04.html
