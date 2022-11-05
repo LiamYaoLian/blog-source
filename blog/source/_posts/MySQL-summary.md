@@ -396,3 +396,17 @@ DROP INDEX index_name ON table_name ;
 ## ER
 * One entity -> a table
 * M-N -> a table
+
+## Stored Procedure
+### Pro
+* Performance
+- compiled once and stored in executable form and shared among users. quicker and reduce memory requirement.
+- reduce network round trips
+- take advantage of the computing resources of the server. For example, you can move computation-bound procedures from client to server
+* Reusability
+- avoid redundant coding of similar queries
+- cross applications
+* Security and encapsulation
+- restrict access
+### Con
+- if changing database, need to change stored procedure
