@@ -46,33 +46,33 @@ column3 datatype [constraint] [comment],
 INDEX [ index_name ] ( column_name )                                 
 foreign key (deptno) references t_dept(deptno)                       
 ....) [comment];                                                     
-                                                                                                                                          
+
 CREATE TABLE database.new_table_name                                 
 AS                                                                   
 (SELECT column1, column2,...                                         
 FROM existing_table_name                                             
 WHERE ....);                                                         
-                                                                     
+
 Show tables;  
-    
+
 describe table_name;                                                 
-                                                                     
+
 ALTER TABLE table_name                                               
 ADD column1 datatype [constraint] [COMMENT] ,                        
 ADD column2 datatype [constraint] [COMMENT] ;                        
-                                                                     
+
 ALTER TABLE table_name                                               
 MODIFY column1 datatype [constraint] [COMMENT] ,                     
 MODIFY column2 datatype [constraint] [COMMENT] ;                     
-                                                                     
+
 ALTER TABLE table_name                                               
 CHANGE column1 new_column_name1 datatype [constraint] [COMMENT] ,    
 CHANGE column2 new_column_name2 datatype [constraint] [COMMENT] ;    
-                                                                     
+
 ALTER TABLE table_name                                               
 DROP column1 ,                                                       
 DROP column2 ;                                                       
-                                                                     
+
 ALTER TABLE table_name RENAME new_table_name ;                       
 ```            
 
@@ -86,12 +86,12 @@ ALTER TABLE table_name RENAME new_table_name ;
 ```SQL                                                                                     
 /*IGNORE: only insert records that do not exist*/                                          
 INSERT [ IGNORE ] INTO table_name [(column1 ,column2, ...)] VALUES (value1, value2, ...);  
-                                                                                           
+
 INSERT INTO table_name （column_name）(                                                      
 SELECT column_name                                                                         
 FROM table_name                                                                            
 WHERE 条件);                                                                                 
-                                                                                                                                                                                      
+
 /*MySQL dialect*/                                                                          
 INSERT INTO table_name SET column1=value1, column2=value2, ...... ;      
 
@@ -109,7 +109,7 @@ DELETE [ IGNORE ] FROM table_name [ LEFT | RIGHT ] JOIN table_name2 ON condition
 WHERE conditions                                                                                 
 [ ORDER BY ... ]                                                                                 
 [ LIMIT ... ] ;                                                                                  
-                                                                                                 
+
 /*delete all*/                                                                                   
 DELETE FROM demo.goodsmaster; // undo log                                                        
 Truncate table table_name; // no in undo log                                                     
@@ -117,7 +117,7 @@ Truncate table table_name; // no in undo log
 
 ### Update
 ```                                                     
-                                                        
+
 UPDATE table_name   
 [left | right] join table_name2
 on conditions                                    
@@ -129,7 +129,7 @@ WHERE 条件
 
 ### Read
 ```                                    
-                                       
+
 SELECT * | [DISTINCT] column_name                 
 FROM table_name                        
 WHERE conditions                       
@@ -137,7 +137,7 @@ GROUP BY column_name
 HAVING conditions                      
 ORDER BY column_name                   
 LIMIT [offset,] row_count                 
-``` 
+```
 #### Join
 * inner join
 * left join, right join
@@ -177,8 +177,8 @@ window_function_name(expression) OVER (
 [ORDER BY <expression> [ASC|DESC], [{,<expression>...}]] // how the rows are ordered within a partition                   
 [frame_unit {<frame_start>|<frame_between>}]                                                                              
 )                                                                                                                            
-                   
-``` 
+
+```
 * frame_unit: row | range
 * frame_start
   - UNBOUNDED PRECEDING: frame starts at the first row of the partition.
@@ -217,7 +217,7 @@ CASE WHEN [compare_value] THEN result
 
 
 ### Column Alias
-* It is not permissible to refer to a column alias in a WHERE clause, because the column value might not yet be determined when the WHERE clause is executed. 
+* It is not permissible to refer to a column alias in a WHERE clause, because the column value might not yet be determined when the WHERE clause is executed.
 
 ### Table Alias
 * derived table must have an alias  
@@ -289,7 +289,7 @@ WITH RECURSIVE cte_name AS (
 SELECT * FROM cte_name;                                                        
 
 ```
-                                                                   
+
 to do: https://www.mysqltutorial.org/mysql-recursive-cte/
 
 ### subquery
@@ -324,7 +324,7 @@ From > join > Where > group by > having > select > distinct > order by > limit
 ### General
 * connection start and end time, all instructions to server   
 ### Slow
-* my.ini, restart after modifying my.ini 
+* my.ini, restart after modifying my.ini
 ### Error
 ### binary log in the server layer    
 * Has statement-based logging: Events contain SQL statements that produce data changes (inserts, updates, deletes)
@@ -342,7 +342,7 @@ From > join > Where > group by > having > select > distinct > order by > limit
   - write to redo log, update memory, then disk
   - when the redo log is full, move to disk to clean some space    
 
-InnoDB prepares redo log. Executor updates binlog. InnoDB commits redo log. 
+InnoDB prepares redo log. Executor updates binlog. InnoDB commits redo log.
 
 ### Lock
 * 行锁是在需要的时候才加上的，等到事务结束时才释放。如果你的事务中需要锁多个行，要把最可能造成锁冲突、最可能影响并发度的锁尽量往后放。
@@ -352,8 +352,8 @@ InnoDB prepares redo log. Executor updates binlog. InnoDB commits redo log.
     这样每次要给影院账户加金额的时候，随机选其中一条记录来加。这样每次冲突概率变成原来的 1/10，可以减少锁等待个数，也就减少了死锁检测的 CPU 消耗。
 ### Isolation Levels
 * read uncommitted: no read-view.
-* read committed: a read-view is created when a SQL query of transaction B executes
-* repeatable read: a read-view is created when the transaction B executes "select" so the undo log has data, so data seen in this transaction are the same as what they were when this transaction started.
+* read committed: a read-view is created when every SQL query of this transaction executes
+* repeatable read: a read-view is created when the transaction executes a query to operate on the table so the undo log has data, so data seen in this transaction are the same as what they were when this transaction started.
 * serializable: read and write will add lock. After a transaction finishes, another transaction can execute.
   ![isolation levels](../image/mysql/1.webp)
   Source: https://time.geekbang.org/column/article/68963
