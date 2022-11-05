@@ -14,32 +14,27 @@ The server sends the result to the client.
 
 The protocol is half-duplex, which means that at any given time the MySQL server can be either sending or receiving messages, but not both. It also means there is no way to cut a message short.
 
+the temporary table created by the subquery has no indexes.
+
 # Metrics
 query cost metrics include:
 - Execution time
 - Number of rows examined
 - Number of rows returned
-
-access types: a full table scan > index scans > range scans > unique index lookups > constants
-
-the temporary table created by the subquery has no indexes.
+Note: access types: a full table scan > index scans > range scans > unique index lookups > constants
 
 # Best Practices
-* Cache frequently-read but rarely updated data
 * Try changing the schema such as using summary tables
 * Try covering indexes
 * Use as few queries as possible, but sometimes executing a few simple queries instead of one complex one.
 * Avoid retrieving unnecessary data such as `select *`
-* Sometimes avoid correlated subqueries.
-  - use join
-  - or manually generate the IN() list by executing the subquery as a separate query with GROUP_CONCAT(). Sometimes this can be faster than a JOIN.
 * union
   - filter out unnecessary rows within union
   - use union all instead of union if possible
-* in
-  - if "in" list is too large, it can be slow. The optimizer will “share” the list by copying it to the corresponding columns in all related tables.
+* Sometimes avoid correlated subqueries.
+  - use join
+  - or manually generate the IN() list by executing the subquery as a separate query with GROUP_CONCAT(). Sometimes this can be faster than a JOIN.
 * join
-  - Consider the join order when adding indexes. If you’re joining tables A and B on column c and the query optimizer decides to join the tables in the order B, A, you don’t need to index the column on table B. In general, you need to add indexes only on the second table in the join order, unless they’re needed for some other reason.
   - decompose a join by running multiple single-table queries instead of a multitable join, and then performing the join in the application. For example, instead of this single query:
   ```
   mysql> SELECT * FROM tag
@@ -54,6 +49,8 @@ the temporary table created by the subquery has no indexes.
   mysql> SELECT * FROM  post WHERE  post.id in (123,456,567,9098,8904);
 
   ```
+  - join in the order A, B. Ideally A should be a smaller table.
+  - Have indexes on the columns in the ON clauses. Consider the join order when adding indexes. If you’re joining tables A and B on column c and the query optimizer decides to join the tables in the order B, A, you don’t need to index the column on table B. In general, you need to add indexes only on the second table in the join order, unless they’re needed for some other reason.
 * group by, order by
   - Try to ensure that any GROUP BY or ORDER BY expression refers only to columns from a single table, so MySQL can try to use an index for that operation.
   - If you need to group a join by a value that comes from a lookup table, it’s usually more efficient to group by the lookup table’s identifier than by the value. For example, the following query isn’t as efficient as it could be:
@@ -63,7 +60,7 @@ the temporary table created by the subquery has no indexes.
       ->    INNER JOIN sakila.actor USING(actor_id)
       -> GROUP BY actor.first_name, actor.last_name;
   ```
-  The query is more efficiently written as follows:
+  Rewrite:
   ```
   mysql> SELECT actor.first_name, actor.last_name, COUNT(*)
       -> FROM sakila.film_actor
@@ -89,6 +86,21 @@ Sometimes you can also convert the limit to a positional query, which the server
 mysql> SELECT film_id, description FROM sakila.film
     -> WHERE position BETWEEN 50 AND 54 ORDER BY position;
 ```
+
+Another example:
+```
+select * from t limit 900000, 10;
+```
+Write:
+```
+select * from t
+where id > 900000
+limit 10;
+```
+* replace "or" with "in" or "union"
+* in
+  - if "in" list is too large, it can be slow. The optimizer will “share” the list by copying it to the corresponding columns in all related tables.  
+* batch insert
 * min and max
   ```
   mysql> SELECT MIN(actor_id) FROM sakila.actor WHERE first_name = 'PENELOPE';
@@ -98,4 +110,4 @@ mysql> SELECT film_id, description FROM sakila.film
   ```
   mysql> SELECT actor_id FROM sakila.actor USE INDEX(PRIMARY)
       -> WHERE first_name = 'PENELOPE' LIMIT 1;
-  ```    
+  ```   
