@@ -26,7 +26,6 @@ COMMIT;
 * If You set AUTOCOMMIT = 1, use `begin` and `start transaction` if one transaction has many queries
 Note: Certain commands (typically DDL such as ALTER TABLE, but may be others such as LOCK TABLES) cause MySQL to commit the transaction before they execute.
 * Choose the suitable isolation level: READ COMMITTED, READ UNCOMMITTED, REPEATABLE READ, (usually not choose) SERIALIZABLE
-TODO
 * Understand how MVCC allows most read queries not needing to acquire locks. `READ COMMITTED` and `REPEATABLE READ` use MVCC, while `READ UNCOMMITTED` and `SERIALIZABLE` do not need it.
 InnoDB implements MVCC by assigning a transaction ID for each transaction at the first time the transaction reads any data. When a record is modified within that transaction, an undo record that explains how to revert that change is written to the undo log, and the rollback pointer of the transaction is pointed at that undo log record.
 
@@ -35,10 +34,9 @@ InnoDB implements MVCC by assigning a transaction ID for each transaction at the
 SELECT ... FOR SHARE          // After MySQL 8.0
 SELECT ... FOR UPDATE
 ```
-TODO
+S Lock: Other sessions can read the rows, but cannot modify them until your transaction commits. If any of these rows were changed by another transaction that has not yet committed, your query waits until that transaction ends and then uses the latest values.
 
-
-
+X Lock: If one transaction adds an X lock on a record, other transactions cannot add locks on it but need to wait.
 
 # Schema
 ## Data Type
@@ -139,7 +137,7 @@ full table scans
   ```
 4. Join
   - Avoid join too many tables. Join them in application.
-  - The table has fewer rows that meet the ON criteria should be the first table.
+  - The table has fewer rows that meet the ON criteria should be the “driver” table. You can manually use this rule in STRAIGHT JOIN, LEFT JOIN, and RIGHT JOIN.
   - If optimizer decides to join the tables in the order B, A, you need to add indexes only on the second table (Table A) in the join order.
 5. Avoid correlated subqueries:
   - Method 1: Replace IN with EXISTS
