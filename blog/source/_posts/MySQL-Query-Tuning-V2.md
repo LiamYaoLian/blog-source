@@ -140,7 +140,7 @@ full table scans
 4. Join
   - Avoid join too many tables. Join them in application.
   - The table has fewer rows that meet the ON criteria should be the first table.
-  - Use the column with an index as the join criteria if possible.
+  - If optimizer decides to join the tables in the order B, A, you need to add indexes only on the second table (Table A) in the join order.
 5. Avoid correlated subqueries:
   - Method 1: Replace IN with EXISTS
   ```
@@ -153,7 +153,10 @@ full table scans
   - Method 3: Generate the IN list with GROUP_CONCAT in another query
 
 
-6. Use columns in the same table in GROUP BY and ORDER BY to leverage index. Move the WITH ROLLUP functionality into your application code.
+6. GROUP BY and ORDER BY
+- Use columns in the same table in GROUP BY and ORDER BY to leverage index.
+- Use index if possible
+- Move the WITH ROLLUP functionality into your application code.
 7. LIMIT with large offet
 ```
 SELECT film_id, description FROM sakila.film ORDER BY title LIMIT 50, 5;
