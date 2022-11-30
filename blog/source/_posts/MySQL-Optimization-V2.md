@@ -1,5 +1,5 @@
 ---
-title: MySQL Query Tuning V2
+title: MySQL Optimization V2
 date: 2022-11-30 10:05:46
 tags:
 ---
