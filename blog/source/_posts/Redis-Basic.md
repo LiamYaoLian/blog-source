@@ -3,6 +3,8 @@ title: Redis Basic
 date: 2022-12-06 16:28:35
 tags:
 ---
+# Redis
+* One thread, I/O multiplexing
 # String
 *  GETSET command sets a key to a new value, returning the old value as the result
 * Set value if key not exist
@@ -313,3 +315,52 @@ BITPOS finds the first bit having the specified value of 0 or 1.
  > pfcount hll
  (integer) 4
 ```
+
+# Stream
+
+# Persistence
+* RDB (Redis Database): point-in-time snapshots of your dataset at specified intervals.
+  - pro
+    - single file, good for backup and disaster recovery
+    - maximize performance because parent process forks a child to persist
+    - faster restart compared to AOF
+    - On replicas, RDB supports partial resynchronizations after restarts and failovers.
+  - con
+    - may have data loss
+    - fork() can be time consuming if the dataset is big, and may result in Redis stopping serving clients for some milliseconds or even for one second if the dataset is very big and the CPU performance is not great. AOF also needs to fork() but less frequently
+* AOF (Append Only File): AOF persistence logs every write operation received by the server. These operations can then be replayed again at server startup, reconstructing the original dataset. Commands are logged using the same format as the Redis protocol itself.
+  - con
+    - AOF files are usually bigger than the equivalent RDB files for the same dataset.
+    - AOF can be slower than RDB depending on the exact fsync policy.
+* No persistence
+* RDB + AOF
+
+* In the case both AOF and RDB persistence are enabled (recommended) and Redis restarts the AOF file will be used to reconstruct the original dataset since it is guaranteed to be the most complete
+
+# Issues
+* Cache avalanche
+  - cache is not available and all requests reach DB
+  - solution
+    - circuit breaker
+    - master-slave or cluster to ensure avaibility
+* cache penetration
+  - frequenly query a data (e.g. ID = -1) that does not exist in both DB and cache, crush the DB
+  - solution
+    - check with codes (e.g. id cannot be less than 0)
+    - save to Redis with null as value, TTL 30
+    - Bloom Filter // TODO
+* expired hotspot
+  - solution
+    - set hotspot to “never expire”
+    - do not make a lot of keys expire at the same time
+    - lock to ensure requests regarding the same data will not reach DB at the same time
+# Cache elimination strategy
+noeviction
+allkeys-lru
+volatile-lru
+allkeys-random
+volatile-random
+volatile-ttl
+
+# Implement queue
+* delayed queue: sorted set, timestamp as score, zrangebyscore to get data added n seconds ago
