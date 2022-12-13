@@ -270,27 +270,27 @@ Reference: https://www.baeldung.com/spring-cache-tutorial
 ```java
 @Transactional(propagation = Propagation.REQUIRED)
 public void testMain(){
-    methodA(a1);
+    save(a1);
     testB();    
 }
 @Transactional(propagation = Propagation.REQUIRED)
 public void testB(){
-    methodB(b1);  
+    save(b1);  
     throw Exception;     
-    methodB(b2);  
+    save(b2);  
 }
-// testMain and testB are rollback
+// testMain and testB are rollback. No data is saved.
 ```
 ```java
 public void testMain(){
-    methodA(a1);  
+    save(a1);  
     testB();    
 }
 @Transactional(propagation = Propagation.REQUIRED)
 public void testB(){
-    methodB(b1);  
+    save(b1);  
     throw Exception;    
-    methodB(b2);  
+    save(b2);  
 }
 // testB creates a new transaction and will roll back. testMain does not have a transaction.
 // a1 is saved into DB. b1 and b2 are not saved into DB.
@@ -298,44 +298,45 @@ public void testB(){
 * PROPAGATION_SUPPORTS: If current transaction exist, join, otherwise execute without transaction
 ```java
 public void testMain(){
-    methodA(a1);  
+    save(a1);  
     testB();    
 }
 @Transactional(propagation = Propagation.SUPPORTS)
 public void testB(){
-    methodB(b1);
+    save(b1);
     throw Exception;     
-    methodB(b2);
+    save(b2);
 }
 // a1 and b1 are saved to DB. b2 is not.
-// if testB is required, no data is saved.
+// if testMain is required, no data is saved.
 ```
 * PROPAGATION_MANDATORY: If current transaction exist, join, otherwise throw an exception
 ```java
 public void testMain(){
-    methodA(a1);  
+    save(a1);  
     testB();    
 }
 @Transactional(propagation = Propagation.MANDATORY)
 public void testB(){
-    methodB(b1);  
+    save(b1);  
     throw Exception;
-    methodB(b2);  
+    save(b2);  
 }
-// a1 is saved to DB. b1 and b2 are not.
+// a1 is saved to DB. b1 and b2 are not, because testB is not executed
+// if testMain is required, no data is saved.
 ```
 * PROPAGATION_REQUIRES_NEW: Create a new transaction. If current transaction exist, suspend the current transaction.
 ```java
 @Transactional(propagation = Propagation.REQUIRED)
 public void testMain(){
-    methodA(a1);  
+    save(a1);  
     testB();    
     throw Exception;    
 }
 @Transactional(propagation = Propagation.REQUIRES_NEW)
 public void testB(){
-    methodB(b1);  
-    methodB(b2);  
+    save(b1);  
+    save(b2);  
 }
 // a1 is not saved. b1 and b2 are saved.
 // if testB is required, no data is saved.
@@ -344,14 +345,14 @@ public void testB(){
 ```java
 @Transactional(propagation = Propagation.REQUIRED)
 public void testMain(){
-    methodA(a1);  
+    save(a1);  
     testB();    
 }
 @Transactional(propagation = Propagation.NOT_SUPPORTED)
 public void testB(){
-    methodB(b1);  
+    save(b1);  
     throw Exception;     
-    methodB(b2);  
+    save(b2);  
 }
 // a1 and b2 are not saved. b1 is saved. testB throws an exception, which causes testMain to roll back.
 ```
@@ -367,20 +368,20 @@ public void testB(){
     B(b1);  //调用B入参b1
     B(b2);  //调用B入参b2
 }
-// no data is saved, because testB throws an exception due to "NEVER"
+// no data is saved, because an exception is thrown due to "NEVER" and testB will not be executed
 ```
 * PROPAGATION_NESTED: If current transaction exists, nest a transaction, otherwise create a new transaction for itself. If parent transaction rolls back, the child transaction also rolls back.
 ```java
 @Transactional(propagation = Propagation.REQUIRED)
 public void testMain(){
-    methodA(a1);  
+    save(a1);  
     testB();    
     throw Exception;     
 }
 @Transactional(propagation = Propagation.NESTED)
 public void testB(){
-    methodB(b1);  
-    methodB(b2);  
+    save(b1);  
+    save(b2);  
 }
 
 // no data is not saved.
@@ -388,19 +389,19 @@ public void testB(){
 ```java
 @Transactional(propagation = Propagation.REQUIRED)
 public void testMain(){
-    A(a1);  //调用A入参a1
-    try{
-        testB();    //调用testB
-    }catch（Exception e){
+    save(a1);  
+    try {
+      testB();    
+    } catch（Exception e){
 
     }
-    A(a2);
+    save(a2);
 }
 @Transactional(propagation = Propagation.NESTED)
 public void testB(){
-    B(b1);  //调用B入参b1
-    throw Exception;     //发生异常抛出
-    B(b2);  //调用B入参b2
+    save(b1);
+    throw Exception;   
+    save(b2);  
 }
 // a1 and a2 are saved. b1 and b2 are not. testMain catches, so only testB rolls back.
 // if testB is REQUIRED, no data is saved even if testMain catches.
