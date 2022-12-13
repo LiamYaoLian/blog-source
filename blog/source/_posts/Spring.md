@@ -396,8 +396,7 @@ ApplicationContext context = new AnnotationConfigApplicationContext(Config.class
 * XML: better for maintenance at a large company
 * Annotation: faster to write, more readable, suitable for light app
 * Java config: avoid XML, avoid making annotations everywhere, check dependencies during compilation to prevent errors, agile
-  ```
-  ```
+
 ### Bean Scope
 * singleton: constructed when IoC container starts, unless postpone construction by "lazy-init" until using; default
 * prototype: constructed when getBean() or injected; not managed by IoC container, will not trigger destroy-method, will destory by GC;
