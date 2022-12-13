@@ -29,7 +29,7 @@ import java.util.Arrays;
 public class WebLogAspect {
     private final Logger log = LoggerFactory.getLogger(WebLogAspect.class);
 
-    @Pointcut("execution(public * co.avasta.abc.controller.*.*(..)))")
+    @Pointcut("execution(public * com.somename.someproject.controller.*.*(..)))")
     public void webLog() {
 
     }
