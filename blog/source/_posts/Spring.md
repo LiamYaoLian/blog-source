@@ -387,7 +387,7 @@ ApplicationContext context = new AnnotationConfigApplicationContext(Config.class
   - CGLib 是运行时字节码增强技术
   - AOP运行时生成目标继承类字节码，进行行为扩展
 ### Spring AOP vs AspectJ AOP
-* Spring AOP uses AspectWeaver to match classes and methods
+* Spring AOP uses AspectJ Weaver to match classes and methods
 
 
 ## Bean

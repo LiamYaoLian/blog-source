@@ -247,6 +247,38 @@ Reference: https://www.baeldung.com/spring-cache-tutorial
   - after throwing
   - after: after normal or exceptional return
   - around
+  ```Java
+  package com.ll.spring.aop.aspect;
+
+  import org.aspectj.lang.ProceedingJoinPoint;
+
+  import java.text.SimpleDateFormat;
+  import java.util.Date;
+
+  public class MethodChecker {
+      // AspectJ ProceedingJoinPoint is extension of JoinPoint
+      // proceed(): executes target method
+      public Object check(ProceedingJoinPoint pjp) throws Throwable {
+          try {
+              long startTime = new Date().getTime();
+              Object ret = pjp.proceed();
+              long endTime = new Date().getTime();
+              long duration = endTime - startTime;
+              if (duration >= 1000) {
+                  String className = pjp.getTarget().getClass().getName();
+                  String methodName = pjp.getSignature().getName();
+                  SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss SSS");
+                  String now = sdf.format(new Date());
+                  System.out.println("=======" + now + ":" + className + "." + methodName + "(" + duration + "ms)======");
+              }
+              return ret;
+          } catch (Throwable throwable) {
+              System.out.println("Exception message:" + throwable.getMessage());
+              throw throwable;
+          }
+      }
+  }
+  ```
 * pointcut: a predicate that matches join points to run advice
   - `*`
   - `..`: package wildcard
@@ -260,7 +292,8 @@ Reference: https://www.baeldung.com/spring-cache-tutorial
   ```
 * target object: object being advised by aspects
 ## Implementation
-* if target class is interface, use JDK dynamic proxy, otherwise use CGLIB
+* if target class implements interface, use JDK dynamic proxy, otherwise use CGLIB
+* Spring AOP uses AspectJ Weaver to do pointcut match
 
 # Declarative transactions
 * uses TransactionManager

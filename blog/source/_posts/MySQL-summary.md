@@ -409,4 +409,7 @@ DROP INDEX index_name ON table_name ;
 * Security and encapsulation
 - restrict access
 ### Con
-- if changing database, need to change stored procedure
+* if changing database, need to change stored procedure
+* Resource usages
+- If you use many stored procedures, the memory usage of every connection will increase substantially.
+- Besides, overusing a large number of logical operations in the stored procedures will increase the CPU usage because the MySQL is not well-designed for logical operations.
